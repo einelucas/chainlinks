@@ -1,0 +1,123 @@
+// Schema do banco de dados — Plataforma de Linktree customizável
+// Para produção, troque o provider para "postgresql" e use uma DATABASE_URL
+// de um serviço como Vercel Postgres, Neon ou Supabase.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   // usada em runtime (com pooler)
+  directUrl = env("DIRECT_URL")     // usada só em migrate/db push (sem pooler)
+}
+
+// ---------- Autenticação ----------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String // hash bcrypt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  page Page?
+
+  @@map("users")
+}
+
+// ---------- Página pública (o "linktree" de cada usuário) ----------
+
+model Page {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Identidade
+  username    String  @unique // usada na URL pública: /username
+  displayName String  @default("Meu Perfil")
+  bio         String  @default("")
+  profileImage String? // data URI (base64) ou URL
+  favicon      String?
+
+  // Layout de fundo
+  bgType    String @default("color") // "color" | "gradient" | "image"
+  bgColor   String @default("#0a0a0a")
+  bgGradientFrom String @default("#0a0a0a")
+  bgGradientTo   String @default("#111111")
+  bgGradientAngle Int   @default(135)
+  bgImage   String? // data URI (base64) ou URL
+  overlayOpacity Float @default(0.7) // escurece a imagem de fundo (0 a 1)
+
+  // Tipografia
+  fontFamily String @default("Montserrat") // nome de fonte do Google Fonts
+  textColor  String @default("#ffffff")
+  bioColor   String @default("#dcdcdc")
+
+  // Botões de link
+  buttonBgColor     String @default("rgba(0,0,0,0.55)")
+  buttonBorderColor String @default("#00ff6a")
+  buttonTextColor   String @default("#ffffff")
+  buttonRadius      Int    @default(999) // px, 999 = totalmente arredondado
+  buttonShadowColor String @default("rgba(0,255,100,0.15)")
+
+  // Hover
+  hoverBgColor     String @default("rgba(0,255,100,0.15)")
+  hoverGlowColor   String @default("rgba(0,255,100,0.45)")
+  hoverScale       Float  @default(1.04)
+
+  // Outros
+  accentColor String @default("#00ff6a") // cor de destaque geral (ícones, títulos)
+  showShareButton Boolean @default(true)
+  showQrButton    Boolean @default(true)
+  isPublished     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  links       LinkItem[]
+  socialIcons SocialIcon[]
+
+  @@map("pages")
+}
+
+// ---------- Links principais (os botões grandes) ----------
+
+model LinkItem {
+  id       String @id @default(cuid())
+  pageId   String
+  page     Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  label    String
+  url      String
+  icon     String? // data URI (base64), URL, ou nome de ícone da biblioteca embutida
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+  clicks   Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pageId, order])
+  @@map("link_items")
+}
+
+// ---------- Ícones sociais (rodapé: whatsapp, instagram, email, telefone...) ----------
+
+model SocialIcon {
+  id     String @id @default(cuid())
+  pageId String
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  platform String // "whatsapp" | "instagram" | "facebook" | "email" | "phone" | "custom" ...
+  url      String
+  icon     String? // data URI (base64) ou URL, sobrescreve o ícone padrão da plataforma
+  order    Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([pageId, order])
+  @@map("social_icons")
+}
