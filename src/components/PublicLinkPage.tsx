@@ -41,7 +41,9 @@ export default function PublicLinkPage({
   )}:wght@300;400;500;600;700&display=swap`;
 
   return (
-    <div
+    <>
+      <link rel="stylesheet" href={fontUrl} />
+      <div
       className={`${scopeId} lp-root`}
       style={
         {
@@ -183,7 +185,6 @@ export default function PublicLinkPage({
       )}
 
       <style jsx>{`
-        @import url("${fontUrl}");
         .lp-root {
           position: relative;
           min-height: ${isPreview ? "100%" : "100dvh"};
@@ -389,5 +390,6 @@ export default function PublicLinkPage({
         }
       `}</style>
     </div>
+    </>
   );
 }
