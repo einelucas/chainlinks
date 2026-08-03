@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Providers from "@/components/Providers";
 import "./globals.css";
+import "./landing.css";
 
 export const metadata: Metadata = {
-  title: "LinkPage — Crie sua página de links",
+  title: "LinkPage — Um único link. Totalmente seu.",
   description:
-    "Monte sua página de links personalizada: cores, imagens, ícones e muito mais.",
+    "Crie uma página de links personalizada em minutos. Escolha cores, fontes e efeitos pelo editor visual, sem precisar programar.",
 };
 
 export default function RootLayout({
