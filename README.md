@@ -10,16 +10,16 @@ HTML/CSS puro), agora transformado em uma plataforma multi-tenant com Next.js.
 
 ## Stack
 
-- **Next.js 15** (App Router) + TypeScript
+- **Next.js 16** (App Router) + TypeScript
 - **Prisma** + SQLite em dev / **PostgreSQL** recomendado em produção
 - **Auth.js (NextAuth v5)** — login por email/senha
-- **Tailwind CSS** — estilização do painel admin
+- **Tailwind CSS 4** — estilização do painel admin
 - **dnd-kit** — reordenar links por arrastar
 - **react-colorful** — seletor de cores
 
 ## Rodando localmente
 
-Pré-requisito: Node.js 18.18+ instalado.
+Pré-requisito: Node.js 20.9+ instalado.
 
 ```bash
 # 1. Instalar dependências (isso também gera o Prisma Client)
@@ -82,6 +82,18 @@ src/components              PublicLinkPage (renderiza a página pública)
 src/components/admin        abas do painel: Links, Redes sociais, Aparência, Perfil
 src/lib                     prisma client, auth config, validação, tipos
 ```
+
+## Painel administrativo
+
+O painel foi redesenhado com foco em clareza, velocidade e uso em dispositivos
+móveis. A navegação agora separa conteúdo, personalização e configurações; o
+preview permanece fixo no desktop e abre em uma gaveta dedicada no celular.
+
+- **Links:** criação, edição, ativação, exclusão, upload de ícone e ordenação por arrastar.
+- **Redes sociais:** inclusão de canais, edição do destino e ícone personalizado.
+- **Aparência:** controles organizados em Fundo, Tipografia, Botões e Efeitos.
+- **Perfil:** foto, nome, bio, endereço público e controle de publicação.
+- **Salvamento:** indicador visual para estados salvando, salvo e erro.
 
 ## Como funciona a customização
 

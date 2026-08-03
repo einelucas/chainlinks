@@ -30,12 +30,12 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-dvh bg-neutral-950 flex flex-col">
+    <div className="admin-root">
       <AdminTopbar
         username={username}
         userName={session.user.name ?? ""}
       />
-      <div className="flex-1">{children}</div>
+      <div className="admin-content-root">{children}</div>
     </div>
   );
 }

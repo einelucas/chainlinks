@@ -1,7 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import type { ButtonSize } from "@/lib/types";
 import { FONT_OPTIONS } from "@/lib/types";
+import {
+  BackgroundIcon,
+  ButtonIcon,
+  DeviceIcon,
+  SparkleIcon,
+  TypeIcon,
+} from "./AdminIcons";
 import ColorField from "./ColorField";
 import ImageUploadField from "./ImageUploadField";
 
@@ -32,9 +40,18 @@ type Props = {
   onUpdate: (data: Record<string, unknown>) => void;
 };
 
+type AppearanceSection = "background" | "typography" | "buttons" | "effects";
+
+const SECTIONS = [
+  { id: "background", label: "Fundo", icon: BackgroundIcon },
+  { id: "typography", label: "Tipografia", icon: TypeIcon },
+  { id: "buttons", label: "Botões", icon: ButtonIcon },
+  { id: "effects", label: "Efeitos", icon: SparkleIcon },
+] as const;
+
 const BUTTON_SIZES: Array<{ value: ButtonSize; label: string; detail: string }> = [
   { value: "small", label: "Pequeno", detail: "Mais compacto" },
-  { value: "medium", label: "Médio", detail: "Tamanho padrão" },
+  { value: "medium", label: "Médio", detail: "Equilíbrio ideal" },
   { value: "large", label: "Grande", detail: "Mais destaque" },
 ];
 
@@ -42,16 +59,81 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionCard({
+  icon,
+  title,
+  description,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="space-y-4 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
-      <p className="text-sm font-semibold text-white">{title}</p>
-      {children}
+    <section className="editor-card appearance-card">
+      <div className="editor-card-heading">
+        <span className="editor-card-icon">{icon}</span>
+        <div>
+          <h2>{title}</h2>
+          <p>{description}</p>
+        </div>
+      </div>
+      <div className="appearance-card-body">{children}</div>
+    </section>
+  );
+}
+
+function RangeControl({
+  label,
+  valueLabel,
+  min,
+  max,
+  step = 1,
+  value,
+  onChange,
+  minLabel,
+  maxLabel,
+}: {
+  label: string;
+  valueLabel: string;
+  min: number;
+  max: number;
+  step?: number;
+  value: number;
+  onChange: (value: number) => void;
+  minLabel?: string;
+  maxLabel?: string;
+}) {
+  const progress = ((value - min) / (max - min)) * 100;
+
+  return (
+    <div className="editor-range-field">
+      <div className="editor-range-heading">
+        <span>{label}</span>
+        <strong>{valueLabel}</strong>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        style={{ "--range-progress": `${progress}%` } as React.CSSProperties}
+      />
+      {(minLabel || maxLabel) && (
+        <div className="editor-range-labels">
+          <span>{minLabel}</span>
+          <span>{maxLabel}</span>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function AppearanceTab(props: Props) {
+  const [section, setSection] = useState<AppearanceSection>("background");
   const { onUpdate } = props;
   const fontSize = clamp(Number.isFinite(props.fontSize) ? props.fontSize : 16, 12, 24);
   const buttonRadius = clamp(
@@ -61,290 +143,294 @@ export default function AppearanceTab(props: Props) {
   );
 
   return (
-    <div className="space-y-5">
-      <Section title="Plano de fundo">
-        <div className="flex flex-wrap gap-2">
-          {[
-            { value: "color", label: "Cor sólida" },
-            { value: "gradient", label: "Gradiente" },
-            { value: "image", label: "Imagem" },
-          ].map((option) => (
+    <div className="appearance-editor">
+      <nav className="appearance-subnav" aria-label="Categorias de aparência">
+        {SECTIONS.map((item) => {
+          const Icon = item.icon;
+          return (
             <button
               type="button"
-              key={option.value}
-              onClick={() => onUpdate({ bgType: option.value })}
-              className={`rounded-lg border px-3 py-1.5 text-xs transition ${
-                props.bgType === option.value
-                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                  : "border-neutral-700 text-neutral-400 hover:border-neutral-600"
-              }`}
+              key={item.id}
+              onClick={() => setSection(item.id)}
+              className={section === item.id ? "is-active" : ""}
+              aria-current={section === item.id ? "page" : undefined}
             >
-              {option.label}
+              <Icon />
+              <span>{item.label}</span>
             </button>
-          ))}
-        </div>
+          );
+        })}
+      </nav>
 
-        {props.bgType === "color" && (
-          <ColorField
-            label="Cor de fundo"
-            value={props.bgColor}
-            onChange={(value) => onUpdate({ bgColor: value })}
-          />
-        )}
-
-        {props.bgType === "gradient" && (
-          <div className="space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <ColorField
-                label="Cor inicial"
-                value={props.bgGradientFrom}
-                onChange={(value) => onUpdate({ bgGradientFrom: value })}
-              />
-              <ColorField
-                label="Cor final"
-                value={props.bgGradientTo}
-                onChange={(value) => onUpdate({ bgGradientTo: value })}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm text-neutral-300">
-                Ângulo: {props.bgGradientAngle}°
-              </label>
-              <input
-                type="range"
-                min={0}
-                max={360}
-                value={props.bgGradientAngle}
-                onChange={(event) =>
-                  onUpdate({ bgGradientAngle: Number(event.target.value) })
-                }
-                className="w-full accent-emerald-500"
-              />
-            </div>
-          </div>
-        )}
-
-        {props.bgType === "image" && (
-          <ImageUploadField
-            label="Imagem de fundo"
-            aspect="wide"
-            maxSizeMb={4}
-            value={props.bgImage}
-            onChange={(dataUrl) => onUpdate({ bgImage: dataUrl })}
-          />
-        )}
-
-        <div>
-          <label className="mb-1.5 block text-sm text-neutral-300">
-            Escurecer fundo: {Math.round(props.overlayOpacity * 100)}%
-          </label>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={Math.round(props.overlayOpacity * 100)}
-            onChange={(event) =>
-              onUpdate({ overlayOpacity: Number(event.target.value) / 100 })
-            }
-            className="w-full accent-emerald-500"
-          />
-        </div>
-      </Section>
-
-      <Section title="Tipografia e cores gerais">
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_180px]">
-          <div>
-            <label className="mb-1.5 block text-sm text-neutral-300">Fonte</label>
-            <select
-              value={props.fontFamily}
-              onChange={(event) => onUpdate({ fontFamily: event.target.value })}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              {FONT_OPTIONS.map((font) => (
-                <option key={font} value={font}>
-                  {font}
-                </option>
+      <div className="appearance-section" key={section}>
+        {section === "background" && (
+          <SectionCard
+            icon={<BackgroundIcon />}
+            title="Plano de fundo"
+            description="Defina a atmosfera principal da sua página."
+          >
+            <div className="appearance-choice-grid appearance-background-choices">
+              {[
+                { value: "color", label: "Cor sólida", preview: props.bgColor },
+                {
+                  value: "gradient",
+                  label: "Gradiente",
+                  preview: `linear-gradient(${props.bgGradientAngle}deg, ${props.bgGradientFrom}, ${props.bgGradientTo})`,
+                },
+                { value: "image", label: "Imagem", preview: props.bgImage ? `url(${props.bgImage})` : "linear-gradient(135deg,#252525,#101010)" },
+              ].map((option) => (
+                <button
+                  type="button"
+                  key={option.value}
+                  onClick={() => onUpdate({ bgType: option.value })}
+                  className={`appearance-choice ${props.bgType === option.value ? "is-active" : ""}`}
+                >
+                  <i style={{ background: option.preview }} />
+                  <span>{option.label}</span>
+                  <small>{props.bgType === option.value ? "Selecionado" : "Usar estilo"}</small>
+                </button>
               ))}
-            </select>
-          </div>
+            </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm text-neutral-300">
-              Tamanho da fonte: {fontSize}px
+            {props.bgType === "color" && (
+              <ColorField
+                label="Cor de fundo"
+                value={props.bgColor}
+                onChange={(value) => onUpdate({ bgColor: value })}
+              />
+            )}
+
+            {props.bgType === "gradient" && (
+              <div className="editor-stack-small">
+                <div className="editor-field-grid editor-field-grid-2">
+                  <ColorField
+                    label="Cor inicial"
+                    value={props.bgGradientFrom}
+                    onChange={(value) => onUpdate({ bgGradientFrom: value })}
+                  />
+                  <ColorField
+                    label="Cor final"
+                    value={props.bgGradientTo}
+                    onChange={(value) => onUpdate({ bgGradientTo: value })}
+                  />
+                </div>
+                <RangeControl
+                  label="Direção do gradiente"
+                  valueLabel={`${props.bgGradientAngle}°`}
+                  min={0}
+                  max={360}
+                  value={props.bgGradientAngle}
+                  onChange={(value) => onUpdate({ bgGradientAngle: value })}
+                  minLabel="0°"
+                  maxLabel="360°"
+                />
+              </div>
+            )}
+
+            {props.bgType === "image" && (
+              <ImageUploadField
+                label="Imagem de fundo"
+                helper="Use uma imagem vertical de alta qualidade"
+                aspect="wide"
+                maxSizeMb={4}
+                value={props.bgImage}
+                onChange={(dataUrl) => onUpdate({ bgImage: dataUrl })}
+              />
+            )}
+
+            <RangeControl
+              label="Escurecer fundo"
+              valueLabel={`${Math.round(props.overlayOpacity * 100)}%`}
+              min={0}
+              max={100}
+              value={Math.round(props.overlayOpacity * 100)}
+              onChange={(value) => onUpdate({ overlayOpacity: value / 100 })}
+              minLabel="Original"
+              maxLabel="Escuro"
+            />
+          </SectionCard>
+        )}
+
+        {section === "typography" && (
+          <SectionCard
+            icon={<TypeIcon />}
+            title="Tipografia e cores"
+            description="Crie hierarquia e garanta uma leitura confortável."
+          >
+            <label className="editor-field">
+              <span>Família da fonte</span>
+              <select
+                value={props.fontFamily}
+                onChange={(event) => onUpdate({ fontFamily: event.target.value })}
+              >
+                {FONT_OPTIONS.map((font) => (
+                  <option key={font} value={font}>{font}</option>
+                ))}
+              </select>
             </label>
-            <input
-              type="number"
+
+            <RangeControl
+              label="Tamanho geral da fonte"
+              valueLabel={`${fontSize}px`}
               min={12}
               max={24}
               value={fontSize}
-              onChange={(event) =>
-                onUpdate({ fontSize: clamp(Number(event.target.value), 12, 24) })
-              }
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
+              onChange={(value) => onUpdate({ fontSize: value })}
+              minLabel="Discreto"
+              maxLabel="Expressivo"
             />
-          </div>
-        </div>
 
-        <input
-          type="range"
-          min={12}
-          max={24}
-          step={1}
-          value={fontSize}
-          onChange={(event) => onUpdate({ fontSize: Number(event.target.value) })}
-          className="w-full accent-emerald-500"
-          aria-label="Tamanho geral da fonte"
-        />
+            <div className="editor-field-grid editor-field-grid-2">
+              <ColorField
+                label="Nome do perfil"
+                value={props.textColor}
+                onChange={(value) => onUpdate({ textColor: value })}
+              />
+              <ColorField
+                label="Texto da bio"
+                value={props.bioColor}
+                onChange={(value) => onUpdate({ bioColor: value })}
+              />
+            </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ColorField
-            label="Cor do texto (nome)"
-            value={props.textColor}
-            onChange={(value) => onUpdate({ textColor: value })}
-          />
-          <ColorField
-            label="Cor da bio"
-            value={props.bioColor}
-            onChange={(value) => onUpdate({ bioColor: value })}
-          />
-        </div>
+            <ColorField
+              label="Cor de destaque"
+              value={props.accentColor}
+              onChange={(value) => onUpdate({ accentColor: value })}
+            />
+          </SectionCard>
+        )}
 
-        <ColorField
-          label="Cor de destaque (accent)"
-          value={props.accentColor}
-          onChange={(value) => onUpdate({ accentColor: value })}
-        />
-      </Section>
+        {section === "buttons" && (
+          <SectionCard
+            icon={<ButtonIcon />}
+            title="Botões de link"
+            description="Ajuste proporções, cores, contraste e acabamento."
+          >
+            <div className="appearance-field-group">
+              <span className="appearance-field-label">Tamanho dos botões</span>
+              <div className="appearance-choice-grid appearance-size-choices">
+                {BUTTON_SIZES.map((size) => (
+                  <button
+                    type="button"
+                    key={size.value}
+                    onClick={() => onUpdate({ buttonSize: size.value })}
+                    className={`appearance-size-choice ${props.buttonSize === size.value ? "is-active" : ""}`}
+                  >
+                    <i className={`button-size-demo is-${size.value}`} />
+                    <strong>{size.label}</strong>
+                    <small>{size.detail}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-      <Section title="Botões de link">
-        <div>
-          <p className="mb-2 text-sm text-neutral-300">Tamanho dos botões</p>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {BUTTON_SIZES.map((size) => (
-              <button
-                type="button"
-                key={size.value}
-                onClick={() => onUpdate({ buttonSize: size.value })}
-                className={`rounded-lg border px-3 py-2 text-left transition ${
-                  props.buttonSize === size.value
-                    ? "border-emerald-500 bg-emerald-500/10 text-emerald-300"
-                    : "border-neutral-700 text-neutral-300 hover:border-neutral-600"
-                }`}
-              >
-                <span className="block text-sm font-medium">{size.label}</span>
-                <span className="block text-[11px] text-neutral-500">
-                  {size.detail}
+            <div className="editor-field-grid editor-field-grid-2">
+              <ColorField
+                label="Fundo do botão"
+                value={props.buttonBgColor}
+                onChange={(value) => onUpdate({ buttonBgColor: value })}
+              />
+              <ColorField
+                label="Borda do botão"
+                value={props.buttonBorderColor}
+                onChange={(value) => onUpdate({ buttonBorderColor: value })}
+              />
+              <ColorField
+                label="Texto do botão"
+                value={props.buttonTextColor}
+                onChange={(value) => onUpdate({ buttonTextColor: value })}
+              />
+              <ColorField
+                label="Brilho / sombra"
+                value={props.buttonShadowColor}
+                onChange={(value) => onUpdate({ buttonShadowColor: value })}
+              />
+            </div>
+
+            <RangeControl
+              label="Arredondamento das bordas"
+              valueLabel={`${buttonRadius}px`}
+              min={0}
+              max={50}
+              value={buttonRadius}
+              onChange={(value) => onUpdate({ buttonRadius: value })}
+              minLabel="Quadrado"
+              maxLabel="Redondo"
+            />
+          </SectionCard>
+        )}
+
+        {section === "effects" && (
+          <div className="editor-stack">
+            <SectionCard
+              icon={<SparkleIcon />}
+              title="Interação dos botões"
+              description="Configure a resposta visual ao passar o mouse."
+            >
+              <div className="editor-field-grid editor-field-grid-2">
+                <ColorField
+                  label="Fundo no hover"
+                  value={props.hoverBgColor}
+                  onChange={(value) => onUpdate({ hoverBgColor: value })}
+                />
+                <ColorField
+                  label="Brilho no hover"
+                  value={props.hoverGlowColor}
+                  onChange={(value) => onUpdate({ hoverGlowColor: value })}
+                />
+              </div>
+
+              <RangeControl
+                label="Zoom no hover"
+                valueLabel={`${props.hoverScale.toFixed(2)}×`}
+                min={100}
+                max={115}
+                value={Math.round(props.hoverScale * 100)}
+                onChange={(value) => onUpdate({ hoverScale: value / 100 })}
+                minLabel="Sem zoom"
+                maxLabel="Destaque"
+              />
+            </SectionCard>
+
+            <SectionCard
+              icon={<DeviceIcon />}
+              title="Ações flutuantes"
+              description="Escolha quais atalhos ficam visíveis na página."
+            >
+              <label className="appearance-toggle-row">
+                <span>
+                  <strong>Compartilhar página</strong>
+                  <small>Exibe um atalho de compartilhamento no topo.</small>
                 </span>
-              </button>
-            ))}
+                <span className="editor-switch editor-switch-large">
+                  <input
+                    type="checkbox"
+                    checked={props.showShareButton}
+                    onChange={(event) => onUpdate({ showShareButton: event.target.checked })}
+                  />
+                  <span aria-hidden="true" />
+                </span>
+              </label>
+
+              <label className="appearance-toggle-row">
+                <span>
+                  <strong>QR Code</strong>
+                  <small>Permite abrir a página rapidamente em outro dispositivo.</small>
+                </span>
+                <span className="editor-switch editor-switch-large">
+                  <input
+                    type="checkbox"
+                    checked={props.showQrButton}
+                    onChange={(event) => onUpdate({ showQrButton: event.target.checked })}
+                  />
+                  <span aria-hidden="true" />
+                </span>
+              </label>
+            </SectionCard>
           </div>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ColorField
-            label="Fundo do botão"
-            value={props.buttonBgColor}
-            onChange={(value) => onUpdate({ buttonBgColor: value })}
-          />
-          <ColorField
-            label="Borda do botão"
-            value={props.buttonBorderColor}
-            onChange={(value) => onUpdate({ buttonBorderColor: value })}
-          />
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ColorField
-            label="Texto do botão"
-            value={props.buttonTextColor}
-            onChange={(value) => onUpdate({ buttonTextColor: value })}
-          />
-          <ColorField
-            label="Brilho/sombra do botão"
-            value={props.buttonShadowColor}
-            onChange={(value) => onUpdate({ buttonShadowColor: value })}
-          />
-        </div>
-
-        <div>
-          <div className="mb-1.5 flex items-center justify-between gap-3">
-            <label className="text-sm text-neutral-300">
-              Arredondamento das bordas
-            </label>
-            <span className="font-mono text-xs text-neutral-500">
-              {buttonRadius}px
-            </span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={50}
-            step={1}
-            value={buttonRadius}
-            onChange={(event) =>
-              onUpdate({ buttonRadius: Number(event.target.value) })
-            }
-            className="w-full accent-emerald-500"
-          />
-          <div className="mt-1 flex justify-between text-[11px] text-neutral-600">
-            <span>Quadrado</span>
-            <span>Totalmente redondo</span>
-          </div>
-        </div>
-      </Section>
-
-      <Section title="Efeito hover (ao passar o mouse)">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ColorField
-            label="Fundo no hover"
-            value={props.hoverBgColor}
-            onChange={(value) => onUpdate({ hoverBgColor: value })}
-          />
-          <ColorField
-            label="Brilho no hover"
-            value={props.hoverGlowColor}
-            onChange={(value) => onUpdate({ hoverGlowColor: value })}
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-sm text-neutral-300">
-            Zoom no hover: {props.hoverScale.toFixed(2)}x
-          </label>
-          <input
-            type="range"
-            min={100}
-            max={115}
-            value={Math.round(props.hoverScale * 100)}
-            onChange={(event) =>
-              onUpdate({ hoverScale: Number(event.target.value) / 100 })
-            }
-            className="w-full accent-emerald-500"
-          />
-        </div>
-      </Section>
-
-      <Section title="Botões flutuantes">
-        <label className="flex cursor-pointer items-center gap-2">
-          <input
-            type="checkbox"
-            checked={props.showShareButton}
-            onChange={(event) =>
-              onUpdate({ showShareButton: event.target.checked })
-            }
-            className="h-4 w-4 accent-emerald-500"
-          />
-          <span className="text-sm text-neutral-300">Botão de compartilhar</span>
-        </label>
-        <label className="flex cursor-pointer items-center gap-2">
-          <input
-            type="checkbox"
-            checked={props.showQrButton}
-            onChange={(event) => onUpdate({ showQrButton: event.target.checked })}
-            className="h-4 w-4 accent-emerald-500"
-          />
-          <span className="text-sm text-neutral-300">Botão de QR Code</span>
-        </label>
-      </Section>
+        )}
+      </div>
     </div>
   );
 }

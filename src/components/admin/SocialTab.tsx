@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { SocialIconData } from "@/lib/types";
 import { SOCIAL_PLATFORMS } from "@/lib/types";
+import { PLATFORM_ICON_MAP } from "@/components/icons";
+import { PlusIcon, SocialIcon, TrashIcon } from "./AdminIcons";
 import ImageUploadField from "./ImageUploadField";
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -38,80 +40,131 @@ export default function SocialTab({ socials, onAdd, onUpdate, onDelete }: Props)
   const sorted = [...socials].sort((a, b) => a.order - b.order);
 
   return (
-    <div className="space-y-5">
-      <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 space-y-3">
-        <p className="text-sm font-medium text-white">Adicionar rede social</p>
-        <div className="grid sm:grid-cols-[160px_1fr] gap-2">
-          <select
-            value={platform}
-            onChange={(e) => setPlatform(e.target.value)}
-            className="rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          >
-            {SOCIAL_PLATFORMS.map((p) => (
-              <option key={p} value={p}>
-                {PLATFORM_LABELS[p]}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder={
-              platform === "email"
-                ? "seuemail@exemplo.com"
-                : platform === "phone"
-                ? "+55 67 99999-0000"
-                : "https://..."
-            }
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
+    <div className="editor-stack">
+      <section className="editor-card editor-add-card">
+        <div className="editor-card-heading">
+          <span className="editor-card-icon"><SocialIcon /></span>
+          <div>
+            <h2>Adicionar rede social</h2>
+            <p>Escolha o canal e informe o endereço que será aberto.</p>
+          </div>
         </div>
-        <button
-          onClick={handleAdd}
-          className="text-sm px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-medium transition"
-        >
-          + Adicionar
-        </button>
-      </div>
 
-      {sorted.length === 0 ? (
-        <p className="text-sm text-neutral-500 text-center py-6">
-          Nenhuma rede social adicionada ainda.
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {sorted.map((s) => (
-            <div
-              key={s.id}
-              className="bg-neutral-900 border border-neutral-800 rounded-xl p-3 space-y-2"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-1 rounded-md bg-neutral-800 text-neutral-300 shrink-0">
-                  {PLATFORM_LABELS[s.platform] ?? s.platform}
-                </span>
-                <input
-                  type="text"
-                  defaultValue={s.url}
-                  onChange={(e) => onUpdate(s.id, { url: e.target.value })}
-                  className="flex-1 min-w-0 rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-1.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <button
-                  onClick={() => onDelete(s.id)}
-                  className="text-neutral-600 hover:text-red-400 text-sm px-1"
-                >
-                  ✕
-                </button>
-              </div>
-              <ImageUploadField
-                label="Ícone customizado (opcional)"
-                value={s.icon}
-                onChange={(dataUrl) => onUpdate(s.id, { icon: dataUrl })}
-              />
-            </div>
-          ))}
+        <div className="editor-field-grid editor-social-add-grid">
+          <label className="editor-field">
+            <span>Canal</span>
+            <select value={platform} onChange={(event) => setPlatform(event.target.value)}>
+              {SOCIAL_PLATFORMS.map((item) => (
+                <option key={item} value={item}>
+                  {PLATFORM_LABELS[item]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="editor-field">
+            <span>{platform === "email" ? "Endereço de email" : platform === "phone" ? "Número de telefone" : "URL do perfil"}</span>
+            <input
+              type="text"
+              placeholder={
+                platform === "email"
+                  ? "seuemail@exemplo.com"
+                  : platform === "phone"
+                    ? "+55 67 99999-0000"
+                    : "https://..."
+              }
+              value={url}
+              onChange={(event) => setUrl(event.target.value)}
+            />
+          </label>
         </div>
-      )}
+
+        <div className="editor-card-actions">
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="admin-primary-button"
+            disabled={!url.trim()}
+          >
+            <PlusIcon />
+            Adicionar canal
+          </button>
+        </div>
+      </section>
+
+      <section className="editor-list-section">
+        <div className="editor-list-heading">
+          <div>
+            <h2>Canais conectados</h2>
+            <p>Esses ícones aparecem na área de contato da sua página.</p>
+          </div>
+          <span>{sorted.length} {sorted.length === 1 ? "canal" : "canais"}</span>
+        </div>
+
+        {sorted.length === 0 ? (
+          <div className="editor-empty-state">
+            <span><SocialIcon /></span>
+            <strong>Nenhum canal conectado</strong>
+            <p>Adicione uma rede social ou forma de contato acima.</p>
+          </div>
+        ) : (
+          <div className="editor-items-list">
+            {sorted.map((social) => {
+              const PlatformIcon = PLATFORM_ICON_MAP[social.platform] ?? PLATFORM_ICON_MAP.custom;
+
+              return (
+                <article key={social.id} className="editor-social-card">
+                  <div className="editor-social-summary">
+                    <span className="editor-item-icon editor-platform-icon">
+                      {social.icon ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={social.icon} alt="" />
+                      ) : (
+                        <PlatformIcon />
+                      )}
+                    </span>
+
+                    <div className="editor-social-copy">
+                      <strong>{PLATFORM_LABELS[social.platform] ?? social.platform}</strong>
+                      <span>Canal conectado</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => onDelete(social.id)}
+                      className="editor-row-action editor-delete-button"
+                      aria-label={`Excluir ${PLATFORM_LABELS[social.platform] ?? social.platform}`}
+                      title="Excluir canal"
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+
+                  <div className="editor-social-details">
+                    <label className="editor-field">
+                      <span>Destino</span>
+                      <input
+                        type="text"
+                        value={social.url}
+                        onChange={(event) => onUpdate(social.id, { url: event.target.value })}
+                      />
+                    </label>
+
+                    <ImageUploadField
+                      label="Ícone personalizado"
+                      helper="Opcional · substitui o ícone da rede"
+                      value={social.icon}
+                      maxSizeMb={2}
+                      onChange={(dataUrl) => onUpdate(social.id, { icon: dataUrl })}
+                      compact
+                    />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

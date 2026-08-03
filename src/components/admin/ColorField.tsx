@@ -85,10 +85,6 @@ export default function ColorField({ label, value, onChange }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setDraft(value);
-  }, [value]);
-
-  useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {
       if (ref.current && !ref.current.contains(event.target as Node)) {
         setOpen(false);
@@ -114,19 +110,19 @@ export default function ColorField({ label, value, onChange }: Props) {
   }
 
   return (
-    <div ref={ref} className="relative">
-      <label className="block text-sm text-neutral-300 mb-1.5">{label}</label>
+    <div ref={ref} className="color-field">
+      <label className="color-field-label">{label}</label>
 
-      <div className="flex gap-2">
+      <div className="color-field-control">
         <button
           type="button"
           onClick={() => setOpen((current) => !current)}
-          className="flex h-10 w-11 shrink-0 items-center justify-center rounded-lg border border-neutral-700 bg-neutral-800 transition hover:border-emerald-500"
+          className="color-swatch-button"
           aria-label={`Abrir seletor de ${label.toLowerCase()}`}
           aria-expanded={open}
         >
           <span
-            className="h-6 w-6 rounded-md border border-white/20 shadow-inner"
+            className="color-swatch"
             style={{ background: value }}
           />
         </button>
@@ -162,21 +158,19 @@ export default function ColorField({ label, value, onChange }: Props) {
           }}
           placeholder="#00ff6a"
           spellCheck={false}
-          className={`h-10 min-w-0 flex-1 rounded-lg border bg-neutral-800 px-3 font-mono text-sm text-white outline-none transition focus:ring-2 focus:ring-emerald-500 ${
-            invalid ? "border-red-500" : "border-neutral-700"
-          }`}
+          className={`color-value-input ${invalid ? "has-error" : ""}`}
           aria-invalid={invalid}
         />
       </div>
 
       {invalid && (
-        <p className="mt-1 text-xs text-red-400">
+        <p className="editor-error-text">
           Use uma cor hexadecimal, por exemplo #00ff6a.
         </p>
       )}
 
       {open && (
-        <div className="absolute z-40 mt-2 rounded-xl border border-neutral-700 bg-neutral-900 p-3 shadow-2xl">
+        <div className="color-picker-popover">
           <HexAlphaColorPicker
             color={toPickerValue(value)}
             onChange={(hex) => {

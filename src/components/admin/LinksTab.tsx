@@ -18,6 +18,13 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { LinkItemData } from "@/lib/types";
 import { ChainIcon } from "@/components/icons";
+import {
+  ChevronIcon,
+  GripIcon,
+  LinksIcon,
+  PlusIcon,
+  TrashIcon,
+} from "./AdminIcons";
 import ImageUploadField from "./ImageUploadField";
 
 type Props = {
@@ -65,80 +72,105 @@ export default function LinksTab({
     setNewIcon(null);
   }
 
+  const canAdd = Boolean(newLabel.trim() && newUrl.trim());
+
   return (
-    <div className="space-y-5">
-      <div className="space-y-4 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
-        <div>
-          <p className="text-sm font-medium text-white">Adicionar novo link</p>
-          <p className="mt-1 text-xs text-neutral-500">
-            O ícone é opcional e aparece ao lado do título do botão.
-          </p>
+    <div className="editor-stack">
+      <section className="editor-card editor-add-card">
+        <div className="editor-card-heading">
+          <span className="editor-card-icon"><LinksIcon /></span>
+          <div>
+            <h2>Adicionar novo link</h2>
+            <p>Inclua um título, o destino e, se quiser, um ícone personalizado.</p>
+          </div>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-2">
-          <input
-            type="text"
-            placeholder="Título (ex: Meu Instagram)"
-            value={newLabel}
-            onChange={(event) => setNewLabel(event.target.value)}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-          <input
-            type="url"
-            placeholder="https://..."
-            value={newUrl}
-            onChange={(event) => setNewUrl(event.target.value)}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
-          />
+        <div className="editor-field-grid editor-field-grid-2">
+          <label className="editor-field">
+            <span>Título do link</span>
+            <input
+              type="text"
+              placeholder="Ex: Meu Instagram"
+              value={newLabel}
+              onChange={(event) => setNewLabel(event.target.value)}
+            />
+          </label>
+          <label className="editor-field">
+            <span>URL de destino</span>
+            <input
+              type="url"
+              placeholder="https://..."
+              value={newUrl}
+              onChange={(event) => setNewUrl(event.target.value)}
+            />
+          </label>
         </div>
 
         <ImageUploadField
-          label="Ícone do link (opcional)"
+          label="Ícone do link"
+          helper="Opcional · PNG, JPG, WEBP ou SVG"
           value={newIcon}
           maxSizeMb={1}
           onChange={setNewIcon}
+          compact
         />
 
-        <button
-          type="button"
-          onClick={handleAdd}
-          className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-emerald-400"
-        >
-          + Adicionar link
-        </button>
-      </div>
-
-      {sorted.length === 0 ? (
-        <p className="py-6 text-center text-sm text-neutral-500">
-          Nenhum link ainda. Adicione o primeiro acima.
-        </p>
-      ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={sorted.map((link) => link.id)}
-            strategy={verticalListSortingStrategy}
+        <div className="editor-card-actions">
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="admin-primary-button"
+            disabled={!canAdd}
           >
-            <div className="space-y-2">
-              {sorted.map((link) => (
-                <SortableLinkRow
-                  key={link.id}
-                  link={link}
-                  expanded={expandedId === link.id}
-                  onToggleExpand={() =>
-                    setExpandedId(expandedId === link.id ? null : link.id)
-                  }
-                  onUpdate={onUpdate}
-                  onDelete={onDelete}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-      )}
+            <PlusIcon />
+            Adicionar link
+          </button>
+        </div>
+      </section>
+
+      <section className="editor-list-section">
+        <div className="editor-list-heading">
+          <div>
+            <h2>Links publicados</h2>
+            <p>Arraste para reorganizar a ordem exibida na sua página.</p>
+          </div>
+          <span>{sorted.length} {sorted.length === 1 ? "link" : "links"}</span>
+        </div>
+
+        {sorted.length === 0 ? (
+          <div className="editor-empty-state">
+            <span><LinksIcon /></span>
+            <strong>Sua lista ainda está vazia</strong>
+            <p>Adicione o primeiro destino para começar a montar sua página.</p>
+          </div>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={sorted.map((link) => link.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="editor-items-list">
+                {sorted.map((link) => (
+                  <SortableLinkRow
+                    key={link.id}
+                    link={link}
+                    expanded={expandedId === link.id}
+                    onToggleExpand={() =>
+                      setExpandedId(expandedId === link.id ? null : link.id)
+                    }
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </section>
     </div>
   );
 }
@@ -162,103 +194,119 @@ function SortableLinkRow({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.55 : 1,
   };
 
   return (
-    <div
+    <article
       ref={setNodeRef}
       style={style}
-      className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900"
+      className={`editor-item-card ${expanded ? "is-expanded" : ""} ${
+        isDragging ? "is-dragging" : ""
+      }`}
     >
-      <div className="flex items-center gap-2 p-3">
+      <div className="editor-item-summary">
         <button
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab px-1 text-neutral-600 hover:text-neutral-400 active:cursor-grabbing"
-          aria-label="Arrastar para reordenar"
+          className="editor-drag-handle"
+          aria-label={`Arrastar ${link.label} para reordenar`}
         >
-          ⠿
+          <GripIcon />
         </button>
+
+        <span className="editor-item-icon">
+          {link.icon ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={link.icon} alt="" />
+          ) : (
+            <ChainIcon width={19} height={19} />
+          )}
+        </span>
 
         <button
           type="button"
           onClick={onToggleExpand}
-          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+          className="editor-item-copy"
           aria-expanded={expanded}
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-400">
-            {link.icon ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={link.icon} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <ChainIcon width={18} height={18} />
-            )}
-          </span>
-
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm text-white">{link.label}</span>
-            <span className="block truncate text-xs text-neutral-500">{link.url}</span>
-          </span>
+          <strong>{link.label}</strong>
+          <span>{link.url}</span>
         </button>
 
-        <input
-          type="checkbox"
-          checked={link.isActive}
-          onChange={(event) =>
-            onUpdate(link.id, { isActive: event.target.checked })
-          }
-          className="h-4 w-4 accent-emerald-500"
-          title="Ativo"
-          aria-label={`Ativar ou desativar ${link.label}`}
-        />
+        <label className="editor-switch" title={link.isActive ? "Link ativo" : "Link inativo"}>
+          <input
+            type="checkbox"
+            checked={link.isActive}
+            onChange={(event) => onUpdate(link.id, { isActive: event.target.checked })}
+          />
+          <span aria-hidden="true" />
+          <small>{link.isActive ? "Ativo" : "Inativo"}</small>
+        </label>
+
+        <button
+          type="button"
+          onClick={onToggleExpand}
+          className={`editor-row-action editor-expand-button ${expanded ? "is-open" : ""}`}
+          aria-label={expanded ? "Recolher edição" : "Editar link"}
+        >
+          <ChevronIcon />
+        </button>
 
         <button
           type="button"
           onClick={() => onDelete(link.id)}
-          className="px-1 text-sm text-neutral-600 hover:text-red-400"
-          aria-label="Excluir"
+          className="editor-row-action editor-delete-button"
+          aria-label={`Excluir ${link.label}`}
+          title="Excluir link"
         >
-          ✕
+          <TrashIcon />
         </button>
       </div>
 
       {expanded && (
-        <div className="space-y-3 border-t border-neutral-800 p-3">
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-xs text-neutral-400">Título</label>
+        <div className="editor-item-details">
+          <div className="editor-field-grid editor-field-grid-2">
+            <label className="editor-field">
+              <span>Título</span>
               <input
                 type="text"
                 value={link.label}
-                onChange={(event) =>
-                  onUpdate(link.id, { label: event.target.value })
-                }
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                onChange={(event) => onUpdate(link.id, { label: event.target.value })}
               />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-neutral-400">Link</label>
+            </label>
+            <label className="editor-field">
+              <span>URL de destino</span>
               <input
                 type="url"
                 value={link.url}
-                onChange={(event) =>
-                  onUpdate(link.id, { url: event.target.value })
-                }
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                onChange={(event) => onUpdate(link.id, { url: event.target.value })}
               />
-            </div>
+            </label>
           </div>
 
           <ImageUploadField
-            label="Ícone do link (opcional)"
+            label="Ícone do link"
+            helper="Opcional · substitui o ícone padrão"
             value={link.icon}
             maxSizeMb={1}
             onChange={(dataUrl) => onUpdate(link.id, { icon: dataUrl })}
+            compact
           />
+
+          <div className="editor-mobile-delete">
+            <button
+              type="button"
+              onClick={() => onDelete(link.id)}
+              className="editor-danger-button"
+            >
+              <TrashIcon />
+              Excluir link
+            </button>
+          </div>
         </div>
       )}
-    </div>
+    </article>
   );
 }

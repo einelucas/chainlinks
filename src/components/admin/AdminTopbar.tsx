@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { ExternalIcon, LogoutIcon } from "./AdminIcons";
 
 export default function AdminTopbar({
   username,
@@ -10,41 +11,49 @@ export default function AdminTopbar({
   username?: string | null;
   userName: string;
 }) {
+  const initial = (userName || username || "L").trim().charAt(0).toUpperCase();
+
   return (
-    <header className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur sticky top-0 z-30">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-black font-bold text-sm">
-            L
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-sm font-medium text-white leading-tight">
-              {userName || "Sua conta"}
-            </p>
-            <p className="text-xs text-neutral-500 leading-tight">
-              {username ? `/${username}` : "Painel administrativo"}
-            </p>
+    <header className="admin-topbar">
+      <div className="admin-topbar-inner">
+        <div className="admin-brand-group">
+          <Link href="/admin" className="admin-brand" aria-label="LinkPage — painel">
+            <span className="admin-brand-mark">L</span>
+            <span className="admin-brand-name">LinkPage</span>
+          </Link>
+
+          <span className="admin-topbar-divider" aria-hidden="true" />
+
+          <div className="admin-account">
+            <span className="admin-account-avatar">{initial}</span>
+            <span className="admin-account-copy">
+              <strong>{userName || "Sua conta"}</strong>
+              <small>{username ? `linkpage.com/${username}` : "Painel administrativo"}</small>
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="admin-topbar-actions">
           {username ? (
             <Link
               href={`/${username}`}
               target="_blank"
               rel="noreferrer"
-              className="text-xs sm:text-sm px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-300 hover:border-emerald-500 hover:text-emerald-400 transition"
+              className="admin-action-button admin-action-secondary"
             >
-              Ver página →
+              <ExternalIcon />
+              <span>Ver página</span>
             </Link>
           ) : null}
 
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="text-xs sm:text-sm px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-400 hover:border-red-500 hover:text-red-400 transition"
+            className="admin-icon-button admin-logout-button"
+            aria-label="Sair da conta"
+            title="Sair da conta"
           >
-            Sair
+            <LogoutIcon />
           </button>
         </div>
       </div>

@@ -8,6 +8,16 @@ import LinksTab from "@/components/admin/LinksTab";
 import SocialTab from "@/components/admin/SocialTab";
 import AppearanceTab from "@/components/admin/AppearanceTab";
 import LivePreview from "@/components/admin/LivePreview";
+import {
+  CheckIcon,
+  CloseAdminIcon,
+  DeviceIcon,
+  LinksIcon,
+  PaletteIcon,
+  ProfileIcon,
+  SocialIcon,
+  SpinnerIcon,
+} from "@/components/admin/AdminIcons";
 
 type AdminPage = PageTheme & {
   isPublished: boolean;
@@ -15,15 +25,39 @@ type AdminPage = PageTheme & {
   socialIcons: SocialIconData[];
 };
 
-type ApiError = {
-  error?: string;
-};
-
 const TABS = [
-  { id: "links", label: "Links" },
-  { id: "social", label: "Redes sociais" },
-  { id: "appearance", label: "Aparência" },
-  { id: "profile", label: "Perfil" },
+  {
+    id: "links",
+    label: "Links",
+    eyebrow: "Conteúdo",
+    title: "Seus links",
+    description: "Crie, edite e organize os principais destinos da sua página.",
+    icon: LinksIcon,
+  },
+  {
+    id: "social",
+    label: "Redes sociais",
+    eyebrow: "Conteúdo",
+    title: "Redes sociais",
+    description: "Mantenha seus canais e formas de contato sempre acessíveis.",
+    icon: SocialIcon,
+  },
+  {
+    id: "appearance",
+    label: "Aparência",
+    eyebrow: "Personalização",
+    title: "Identidade visual",
+    description: "Ajuste cada detalhe e acompanhe o resultado em tempo real.",
+    icon: PaletteIcon,
+  },
+  {
+    id: "profile",
+    label: "Perfil",
+    eyebrow: "Configurações",
+    title: "Perfil e publicação",
+    description: "Defina sua identidade, endereço público e visibilidade.",
+    icon: ProfileIcon,
+  },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -56,12 +90,29 @@ function isAdminPage(value: unknown): value is AdminPage {
 export default function AdminDashboard() {
   const [page, setPage] = useState<AdminPage | null>(null);
   const [tab, setTab] = useState<TabId>("links");
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
   const [saveState, setSaveState] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    if (!mobilePreviewOpen) return;
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMobilePreviewOpen(false);
+    }
+
+    document.body.classList.add("admin-preview-is-open");
+    document.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.classList.remove("admin-preview-is-open");
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobilePreviewOpen]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -319,22 +370,23 @@ export default function AdminDashboard() {
     return theme;
   }, [page]);
 
+  const activeTab = TABS.find((item) => item.id === tab) ?? TABS[0];
+
   if (loadError) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="max-w-xl rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
-          <h1 className="text-lg font-semibold text-red-300">
-            Não foi possível abrir o painel
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-neutral-300">{loadError}</p>
-          <p className="mt-3 text-xs leading-5 text-neutral-500">
+      <div className="admin-state-page">
+        <div className="admin-state-card admin-state-error">
+          <span className="admin-state-icon">!</span>
+          <h1>Não foi possível abrir o painel</h1>
+          <p>{loadError}</p>
+          <small>
             Verifique DATABASE_URL, rode as migrations do Prisma e confirme que a
             sessão ainda está válida.
-          </p>
+          </small>
           <button
             type="button"
             onClick={() => setReloadKey((value) => value + 1)}
-            className="mt-5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-emerald-400"
+            className="admin-primary-button"
           >
             Tentar novamente
           </button>
@@ -345,103 +397,219 @@ export default function AdminDashboard() {
 
   if (!page || !previewTheme) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <p className="text-neutral-500 text-sm">Carregando painel...</p>
+      <div className="admin-state-page">
+        <div className="admin-loading-card">
+          <span className="admin-loading-mark">L</span>
+          <div>
+            <strong>Preparando seu editor</strong>
+            <span>Carregando página e preferências...</span>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto grid max-w-[1440px] gap-8 px-4 py-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,390px)]">
-      <div className="min-w-0">
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex max-w-full gap-1 overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-900 p-1">
-            {TABS.map((item) => (
+    <div className="admin-dashboard-shell">
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-heading">
+          <span className="admin-sidebar-kicker">Workspace</span>
+          <strong>Editor visual</strong>
+          <span className="admin-live-label"><i /> Preview ao vivo</span>
+        </div>
+
+        <nav className="admin-sidebar-nav" aria-label="Seções do editor">
+          <span className="admin-nav-group-label">Conteúdo</span>
+          {TABS.filter((item) => item.eyebrow === "Conteúdo").map((item) => {
+            const Icon = item.icon;
+            return (
               <button
                 type="button"
                 key={item.id}
                 onClick={() => setTab(item.id)}
-                className={`text-sm px-3.5 py-1.5 rounded-lg transition ${
-                  tab === item.id
-                    ? "bg-emerald-500 text-black font-medium"
-                    : "text-neutral-400 hover:text-white"
-                }`}
+                className={`admin-nav-button ${tab === item.id ? "is-active" : ""}`}
+                aria-current={tab === item.id ? "page" : undefined}
               >
-                {item.label}
+                <Icon />
+                <span>{item.label}</span>
+                {item.id === "links" && <small>{page.links.length}</small>}
               </button>
-            ))}
+            );
+          })}
+
+          <span className="admin-nav-group-label admin-nav-group-spaced">
+            Personalização
+          </span>
+          {TABS.filter((item) => item.eyebrow !== "Conteúdo").map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                type="button"
+                key={item.id}
+                onClick={() => setTab(item.id)}
+                className={`admin-nav-button ${tab === item.id ? "is-active" : ""}`}
+                aria-current={tab === item.id ? "page" : undefined}
+              >
+                <Icon />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="admin-sidebar-foot">
+          <span className={`admin-publish-dot ${page.isPublished ? "is-online" : ""}`} />
+          <div>
+            <strong>{page.isPublished ? "Página publicada" : "Página privada"}</strong>
+            <small>{page.isPublished ? "Visível para todos" : "Somente você pode ver"}</small>
           </div>
-          <SaveIndicator state={saveState} />
+        </div>
+      </aside>
+
+      <div className="admin-workspace">
+        <div className="admin-mobile-nav" role="tablist" aria-label="Seções do editor">
+          {TABS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === item.id}
+                key={item.id}
+                onClick={() => setTab(item.id)}
+                className={tab === item.id ? "is-active" : ""}
+              >
+                <Icon />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {tab === "links" && (
-          <LinksTab
+        <main className="admin-editor-column">
+          <header className="admin-section-heading">
+            <div>
+              <span className="admin-section-kicker">{activeTab.eyebrow}</span>
+              <h1>{activeTab.title}</h1>
+              <p>{activeTab.description}</p>
+            </div>
+            <SaveIndicator state={saveState} />
+          </header>
+
+          <div className="admin-tab-content" key={tab}>
+            {tab === "links" && (
+              <LinksTab
+                links={page.links}
+                onAdd={addLink}
+                onUpdate={updateLink}
+                onDelete={deleteLink}
+                onReorder={reorderLinks}
+              />
+            )}
+
+            {tab === "social" && (
+              <SocialTab
+                socials={page.socialIcons}
+                onAdd={addSocial}
+                onUpdate={updateSocial}
+                onDelete={deleteSocial}
+              />
+            )}
+
+            {tab === "appearance" && (
+              <AppearanceTab
+                bgType={page.bgType}
+                bgColor={page.bgColor}
+                bgGradientFrom={page.bgGradientFrom}
+                bgGradientTo={page.bgGradientTo}
+                bgGradientAngle={page.bgGradientAngle}
+                bgImage={page.bgImage}
+                overlayOpacity={page.overlayOpacity}
+                fontFamily={page.fontFamily}
+                fontSize={page.fontSize ?? 16}
+                textColor={page.textColor}
+                bioColor={page.bioColor}
+                accentColor={page.accentColor}
+                buttonBgColor={page.buttonBgColor}
+                buttonBorderColor={page.buttonBorderColor}
+                buttonTextColor={page.buttonTextColor}
+                buttonRadius={page.buttonRadius}
+                buttonSize={page.buttonSize ?? "medium"}
+                buttonShadowColor={page.buttonShadowColor}
+                hoverBgColor={page.hoverBgColor}
+                hoverGlowColor={page.hoverGlowColor}
+                hoverScale={page.hoverScale}
+                showShareButton={page.showShareButton}
+                showQrButton={page.showQrButton}
+                onUpdate={updatePage}
+              />
+            )}
+
+            {tab === "profile" && (
+              <ProfileTab
+                username={page.username}
+                displayName={page.displayName}
+                bio={page.bio}
+                profileImage={page.profileImage}
+                isPublished={page.isPublished}
+                onUpdate={updatePage}
+                usernameError={usernameError}
+              />
+            )}
+          </div>
+        </main>
+
+        <aside className="admin-preview-column">
+          <LivePreview
+            theme={previewTheme}
             links={page.links}
-            onAdd={addLink}
-            onUpdate={updateLink}
-            onDelete={deleteLink}
-            onReorder={reorderLinks}
-          />
-        )}
-
-        {tab === "social" && (
-          <SocialTab
             socials={page.socialIcons}
-            onAdd={addSocial}
-            onUpdate={updateSocial}
-            onDelete={deleteSocial}
           />
-        )}
-
-        {tab === "appearance" && (
-          <AppearanceTab
-            bgType={page.bgType}
-            bgColor={page.bgColor}
-            bgGradientFrom={page.bgGradientFrom}
-            bgGradientTo={page.bgGradientTo}
-            bgGradientAngle={page.bgGradientAngle}
-            bgImage={page.bgImage}
-            overlayOpacity={page.overlayOpacity}
-            fontFamily={page.fontFamily}
-            fontSize={page.fontSize ?? 16}
-            textColor={page.textColor}
-            bioColor={page.bioColor}
-            accentColor={page.accentColor}
-            buttonBgColor={page.buttonBgColor}
-            buttonBorderColor={page.buttonBorderColor}
-            buttonTextColor={page.buttonTextColor}
-            buttonRadius={page.buttonRadius}
-            buttonSize={page.buttonSize ?? "medium"}
-            buttonShadowColor={page.buttonShadowColor}
-            hoverBgColor={page.hoverBgColor}
-            hoverGlowColor={page.hoverGlowColor}
-            hoverScale={page.hoverScale}
-            showShareButton={page.showShareButton}
-            showQrButton={page.showQrButton}
-            onUpdate={updatePage}
-          />
-        )}
-
-        {tab === "profile" && (
-          <ProfileTab
-            username={page.username}
-            displayName={page.displayName}
-            bio={page.bio}
-            profileImage={page.profileImage}
-            isPublished={page.isPublished}
-            onUpdate={updatePage}
-            usernameError={usernameError}
-          />
-        )}
+        </aside>
       </div>
 
-      <div className="min-w-0">
-        <LivePreview
-          theme={previewTheme}
-          links={page.links}
-          socials={page.socialIcons}
-        />
-      </div>
+      <button
+        type="button"
+        className="admin-mobile-preview-button"
+        onClick={() => setMobilePreviewOpen(true)}
+      >
+        <DeviceIcon />
+        <span>Ver preview</span>
+      </button>
+
+      {mobilePreviewOpen && (
+        <div className="admin-preview-modal" role="dialog" aria-modal="true" aria-label="Preview da página">
+          <button
+            type="button"
+            className="admin-preview-backdrop"
+            onClick={() => setMobilePreviewOpen(false)}
+            aria-label="Fechar preview"
+          />
+          <section className="admin-preview-sheet">
+            <header>
+              <div>
+                <span>Preview ao vivo</span>
+                <small>As alterações aparecem instantaneamente</small>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobilePreviewOpen(false)}
+                aria-label="Fechar preview"
+              >
+                <CloseAdminIcon />
+              </button>
+            </header>
+            <div className="admin-preview-sheet-scroll">
+              <LivePreview
+                theme={previewTheme}
+                links={page.links}
+                socials={page.socialIcons}
+                embedded
+              />
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
@@ -451,14 +619,18 @@ function SaveIndicator({
 }: {
   state: "idle" | "saving" | "saved" | "error";
 }) {
-  if (state === "idle") return null;
-
   const map = {
-    saving: { text: "Salvando...", color: "text-neutral-500" },
-    saved: { text: "Salvo ✓", color: "text-emerald-400" },
-    error: { text: "Erro ao salvar", color: "text-red-400" },
+    idle: { text: "Tudo salvo", className: "is-saved", icon: CheckIcon },
+    saving: { text: "Salvando...", className: "is-saving", icon: SpinnerIcon },
+    saved: { text: "Alterações salvas", className: "is-saved", icon: CheckIcon },
+    error: { text: "Erro ao salvar", className: "is-error", icon: CloseAdminIcon },
   } as const;
 
-  const { text, color } = map[state];
-  return <span className={`text-xs ${color}`}>{text}</span>;
+  const { text, className, icon: Icon } = map[state];
+  return (
+    <span className={`admin-save-indicator ${className}`} role="status">
+      <Icon />
+      {text}
+    </span>
+  );
 }
