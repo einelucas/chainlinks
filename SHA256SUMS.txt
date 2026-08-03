@@ -1,0 +1,12 @@
+ee5fd0c2d3ffe6680e96b3dcbded670d19b0c56dd668d0dc826416bc42a16dff  ./APLICAR.md
+5fdd8b2cb34b96bb49892e68e27d250072179f2a023df4b6415596fb4ea8cb1e  ./prisma/schema.prisma
+de581a118d2f3b17d987a656c03a026ef8b30bd4aa5b5660e1cd4ce22f995aa7  ./src/app/[username]/page.tsx
+647c5b5e1655c9ccbf550999bd11dba2b554d90a664092e961fa0439535cf975  ./src/app/admin/page.tsx
+28118f7d1821d69babf33924b498f5d2e7f935098c79015ec07d75f3e9b7ef26  ./src/app/api/page/route.ts
+04ce7880429b2bd1177396e2a448d42f8c6810f09e030093e0a437255f4aa97c  ./src/components/PublicLinkPage.module.css
+c6d59f73398f5864fc9ee125bb20e098f65365600f06a7b7e79b08928df6b29e  ./src/components/PublicLinkPage.tsx
+0ffa0d22fe9c6c5bf2516bc2b783f34f966cf88e87f1b7670729ffe21bfa376e  ./src/components/admin/AppearanceTab.tsx
+7c9547cb987256b6fc136d1a126105cea5fe9466bcb6dfb0e810e826166e9b8f  ./src/components/admin/ColorField.tsx
+5ff3449e74bf13e6be34ac2ea275f93ab045c513d7349cdcd85e690e3acffce8  ./src/components/admin/LinksTab.tsx
+99395adbc401184aadee486b3a27da6c0501f7a84d26a1524487bbcf9c262c29  ./src/components/admin/LivePreview.tsx
+71bdc9005dcee4930911c9c06e308bc2937b48742d85c862b0cd1f5e192f3461  ./src/lib/types.ts

@@ -5,25 +5,36 @@ import AdminTopbar from "@/components/admin/AdminTopbar";
 
 export default async function AdminLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const session = await auth();
+
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  const page = await prisma.page.findUnique({
-    where: { userId: session.user.id },
-  });
+  // O layout não deve impedir a renderização inteira caso o banco esteja
+  // temporariamente indisponível. A página e a API exibem o erro controlado.
+  let username: string | null = null;
 
-  if (!page) {
-    redirect("/login");
+  try {
+    const page = await prisma.page.findUnique({
+      where: { userId: session.user.id },
+      select: { username: true },
+    });
+
+    username = page?.username ?? null;
+  } catch (error) {
+    console.error("[admin/layout] Não foi possível carregar o username:", error);
   }
 
   return (
     <div className="min-h-dvh bg-neutral-950 flex flex-col">
-      <AdminTopbar username={page.username} userName={session.user?.name ?? ""} />
+      <AdminTopbar
+        username={username}
+        userName={session.user.name ?? ""}
+      />
       <div className="flex-1">{children}</div>
     </div>
   );

@@ -7,7 +7,7 @@ export default function AdminTopbar({
   username,
   userName,
 }: {
-  username: string;
+  username?: string | null;
   userName: string;
 }) {
   return (
@@ -21,19 +21,26 @@ export default function AdminTopbar({
             <p className="text-sm font-medium text-white leading-tight">
               {userName || "Sua conta"}
             </p>
-            <p className="text-xs text-neutral-500 leading-tight">/{username}</p>
+            <p className="text-xs text-neutral-500 leading-tight">
+              {username ? `/${username}` : "Painel administrativo"}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            href={`/${username}`}
-            target="_blank"
-            className="text-xs sm:text-sm px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-300 hover:border-emerald-500 hover:text-emerald-400 transition"
-          >
-            Ver página →
-          </Link>
+          {username ? (
+            <Link
+              href={`/${username}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs sm:text-sm px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-300 hover:border-emerald-500 hover:text-emerald-400 transition"
+            >
+              Ver página →
+            </Link>
+          ) : null}
+
           <button
+            type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
             className="text-xs sm:text-sm px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-400 hover:border-red-500 hover:text-red-400 transition"
           >

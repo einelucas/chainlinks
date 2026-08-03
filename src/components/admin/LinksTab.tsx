@@ -17,11 +17,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { LinkItemData } from "@/lib/types";
+import { ChainIcon } from "@/components/icons";
 import ImageUploadField from "./ImageUploadField";
 
 type Props = {
   links: LinkItemData[];
-  onAdd: (label: string, url: string) => void;
+  onAdd: (label: string, url: string, icon?: string | null) => void;
   onUpdate: (id: string, data: Partial<LinkItemData>) => void;
   onDelete: (id: string) => void;
   onReorder: (orderedIds: string[]) => void;
@@ -36,8 +37,8 @@ export default function LinksTab({
 }: Props) {
   const [newLabel, setNewLabel] = useState("");
   const [newUrl, setNewUrl] = useState("");
+  const [newIcon, setNewIcon] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -48,49 +49,67 @@ export default function LinksTab({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = sorted.findIndex((l) => l.id === active.id);
-    const newIndex = sorted.findIndex((l) => l.id === over.id);
+    const oldIndex = sorted.findIndex((link) => link.id === active.id);
+    const newIndex = sorted.findIndex((link) => link.id === over.id);
     const moved = arrayMove(sorted, oldIndex, newIndex);
-    onReorder(moved.map((l) => l.id));
+
+    onReorder(moved.map((link) => link.id));
   }
 
   function handleAdd() {
     if (!newLabel.trim() || !newUrl.trim()) return;
-    onAdd(newLabel.trim(), newUrl.trim());
+
+    onAdd(newLabel.trim(), newUrl.trim(), newIcon);
     setNewLabel("");
     setNewUrl("");
+    setNewIcon(null);
   }
 
   return (
     <div className="space-y-5">
-      <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 space-y-3">
-        <p className="text-sm font-medium text-white">Adicionar novo link</p>
-        <div className="grid sm:grid-cols-2 gap-2">
+      <div className="space-y-4 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+        <div>
+          <p className="text-sm font-medium text-white">Adicionar novo link</p>
+          <p className="mt-1 text-xs text-neutral-500">
+            O ícone é opcional e aparece ao lado do título do botão.
+          </p>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
           <input
             type="text"
             placeholder="Título (ex: Meu Instagram)"
             value={newLabel}
-            onChange={(e) => setNewLabel(e.target.value)}
-            className="rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            onChange={(event) => setNewLabel(event.target.value)}
+            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
           />
           <input
-            type="text"
+            type="url"
             placeholder="https://..."
             value={newUrl}
-            onChange={(e) => setNewUrl(e.target.value)}
-            className="rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            onChange={(event) => setNewUrl(event.target.value)}
+            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
+
+        <ImageUploadField
+          label="Ícone do link (opcional)"
+          value={newIcon}
+          maxSizeMb={1}
+          onChange={setNewIcon}
+        />
+
         <button
+          type="button"
           onClick={handleAdd}
-          className="text-sm px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-medium transition"
+          className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-emerald-400"
         >
           + Adicionar link
         </button>
       </div>
 
       {sorted.length === 0 ? (
-        <p className="text-sm text-neutral-500 text-center py-6">
+        <p className="py-6 text-center text-sm text-neutral-500">
           Nenhum link ainda. Adicione o primeiro acima.
         </p>
       ) : (
@@ -100,7 +119,7 @@ export default function LinksTab({
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={sorted.map((l) => l.id)}
+            items={sorted.map((link) => link.id)}
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-2">
@@ -150,34 +169,55 @@ function SortableLinkRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden"
+      className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900"
     >
       <div className="flex items-center gap-2 p-3">
         <button
+          type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-neutral-600 hover:text-neutral-400 px-1"
+          className="cursor-grab px-1 text-neutral-600 hover:text-neutral-400 active:cursor-grabbing"
           aria-label="Arrastar para reordenar"
         >
           ⠿
         </button>
 
-        <div className="flex-1 min-w-0 cursor-pointer" onClick={onToggleExpand}>
-          <p className="text-sm text-white truncate">{link.label}</p>
-          <p className="text-xs text-neutral-500 truncate">{link.url}</p>
-        </div>
+        <button
+          type="button"
+          onClick={onToggleExpand}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+          aria-expanded={expanded}
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-400">
+            {link.icon ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={link.icon} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <ChainIcon width={18} height={18} />
+            )}
+          </span>
+
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm text-white">{link.label}</span>
+            <span className="block truncate text-xs text-neutral-500">{link.url}</span>
+          </span>
+        </button>
 
         <input
           type="checkbox"
           checked={link.isActive}
-          onChange={(e) => onUpdate(link.id, { isActive: e.target.checked })}
-          className="w-4 h-4 accent-emerald-500"
+          onChange={(event) =>
+            onUpdate(link.id, { isActive: event.target.checked })
+          }
+          className="h-4 w-4 accent-emerald-500"
           title="Ativo"
+          aria-label={`Ativar ou desativar ${link.label}`}
         />
 
         <button
+          type="button"
           onClick={() => onDelete(link.id)}
-          className="text-neutral-600 hover:text-red-400 text-sm px-1"
+          className="px-1 text-sm text-neutral-600 hover:text-red-400"
           aria-label="Excluir"
         >
           ✕
@@ -185,30 +225,36 @@ function SortableLinkRow({
       </div>
 
       {expanded && (
-        <div className="border-t border-neutral-800 p-3 space-y-3">
-          <div className="grid sm:grid-cols-2 gap-2">
+        <div className="space-y-3 border-t border-neutral-800 p-3">
+          <div className="grid gap-2 sm:grid-cols-2">
             <div>
-              <label className="block text-xs text-neutral-400 mb-1">Título</label>
+              <label className="mb-1 block text-xs text-neutral-400">Título</label>
               <input
                 type="text"
-                defaultValue={link.label}
-                onChange={(e) => onUpdate(link.id, { label: e.target.value })}
-                className="w-full rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-1.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                value={link.label}
+                onChange={(event) =>
+                  onUpdate(link.id, { label: event.target.value })
+                }
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
-              <label className="block text-xs text-neutral-400 mb-1">Link</label>
+              <label className="mb-1 block text-xs text-neutral-400">Link</label>
               <input
-                type="text"
-                defaultValue={link.url}
-                onChange={(e) => onUpdate(link.id, { url: e.target.value })}
-                className="w-full rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-1.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                type="url"
+                value={link.url}
+                onChange={(event) =>
+                  onUpdate(link.id, { url: event.target.value })
+                }
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
+
           <ImageUploadField
-            label="Ícone customizado (opcional)"
+            label="Ícone do link (opcional)"
             value={link.icon}
+            maxSizeMb={1}
             onChange={(dataUrl) => onUpdate(link.id, { icon: dataUrl })}
           />
         </div>

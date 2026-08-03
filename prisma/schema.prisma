@@ -7,8 +7,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "sqlite" // troque para "postgresql" em produção
-  url       = env("DATABASE_URL")
+  provider = "postgresql" // troque para "postgresql" em produção
+  url      = env("DATABASE_URL")
   // Em produção com Postgres + pooler (Neon/Supabase/Vercel Postgres),
   // descomente a linha abaixo e defina DIRECT_URL no .env — o Prisma usa
   // essa conexão direta (sem pooler) apenas para migrate/db push.
@@ -39,23 +39,24 @@ model Page {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Identidade
-  username    String  @unique // usada na URL pública: /username
-  displayName String  @default("Meu Perfil")
-  bio         String  @default("")
+  username     String  @unique // usada na URL pública: /username
+  displayName  String  @default("Meu Perfil")
+  bio          String  @default("")
   profileImage String? // data URI (base64) ou URL
   favicon      String?
 
   // Layout de fundo
-  bgType    String @default("color") // "color" | "gradient" | "image"
-  bgColor   String @default("#0a0a0a")
-  bgGradientFrom String @default("#0a0a0a")
-  bgGradientTo   String @default("#111111")
-  bgGradientAngle Int   @default(135)
-  bgImage   String? // data URI (base64) ou URL
-  overlayOpacity Float @default(0.7) // escurece a imagem de fundo (0 a 1)
+  bgType          String  @default("color") // "color" | "gradient" | "image"
+  bgColor         String  @default("#0a0a0a")
+  bgGradientFrom  String  @default("#0a0a0a")
+  bgGradientTo    String  @default("#111111")
+  bgGradientAngle Int     @default(135)
+  bgImage         String? // data URI (base64) ou URL
+  overlayOpacity  Float   @default(0.7) // escurece a imagem de fundo (0 a 1)
 
   // Tipografia
   fontFamily String @default("Montserrat") // nome de fonte do Google Fonts
+  fontSize   Int    @default(16) // tamanho base da tipografia em px
   textColor  String @default("#ffffff")
   bioColor   String @default("#dcdcdc")
 
@@ -63,16 +64,17 @@ model Page {
   buttonBgColor     String @default("rgba(0,0,0,0.55)")
   buttonBorderColor String @default("#00ff6a")
   buttonTextColor   String @default("#ffffff")
-  buttonRadius      Int    @default(999) // px, 999 = totalmente arredondado
+  buttonRadius      Int    @default(50) // px, 50 = totalmente arredondado
+  buttonSize        String @default("medium") // "small" | "medium" | "large"
   buttonShadowColor String @default("rgba(0,255,100,0.15)")
 
   // Hover
-  hoverBgColor     String @default("rgba(0,255,100,0.15)")
-  hoverGlowColor   String @default("rgba(0,255,100,0.45)")
-  hoverScale       Float  @default(1.04)
+  hoverBgColor   String @default("rgba(0,255,100,0.15)")
+  hoverGlowColor String @default("rgba(0,255,100,0.45)")
+  hoverScale     Float  @default(1.04)
 
   // Outros
-  accentColor String @default("#00ff6a") // cor de destaque geral (ícones, títulos)
+  accentColor     String  @default("#00ff6a") // cor de destaque geral (ícones, títulos)
   showShareButton Boolean @default(true)
   showQrButton    Boolean @default(true)
   isPublished     Boolean @default(true)
@@ -89,9 +91,9 @@ model Page {
 // ---------- Links principais (os botões grandes) ----------
 
 model LinkItem {
-  id       String @id @default(cuid())
-  pageId   String
-  page     Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  pageId String
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   label    String
   url      String

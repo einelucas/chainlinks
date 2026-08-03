@@ -15,6 +15,9 @@ export type SocialIconData = {
   order: number;
 };
 
+export const BUTTON_SIZE_OPTIONS = ["small", "medium", "large"] as const;
+export type ButtonSize = (typeof BUTTON_SIZE_OPTIONS)[number];
+
 export type PageTheme = {
   username: string;
   displayName: string;
@@ -30,6 +33,7 @@ export type PageTheme = {
   overlayOpacity: number;
 
   fontFamily: string;
+  fontSize: number;
   textColor: string;
   bioColor: string;
 
@@ -37,6 +41,7 @@ export type PageTheme = {
   buttonBorderColor: string;
   buttonTextColor: string;
   buttonRadius: number;
+  buttonSize: ButtonSize;
   buttonShadowColor: string;
 
   hoverBgColor: string;
@@ -66,7 +71,6 @@ export const SOCIAL_PLATFORMS = [
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
 
 // Fontes do Google Fonts disponíveis no editor de aparência.
-// Para adicionar mais, basta incluir o nome exato como aparece no Google Fonts.
 export const FONT_OPTIONS = [
   "Montserrat",
   "Roboto",

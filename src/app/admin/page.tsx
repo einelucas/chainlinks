@@ -15,6 +15,10 @@ type AdminPage = PageTheme & {
   socialIcons: SocialIconData[];
 };
 
+type ApiError = {
+  error?: string;
+};
+
 const TABS = [
   { id: "links", label: "Links" },
   { id: "social", label: "Redes sociais" },
@@ -24,166 +28,320 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function getApiError(value: unknown, fallback: string): string {
+  if (isRecord(value) && typeof value.error === "string" && value.error.trim()) {
+    return value.error;
+  }
+
+  return fallback;
+}
+
+function isAdminPage(value: unknown): value is AdminPage {
+  if (!isRecord(value)) return false;
+
+  return (
+    typeof value.username === "string" &&
+    typeof value.displayName === "string" &&
+    typeof value.bio === "string" &&
+    typeof value.isPublished === "boolean" &&
+    Array.isArray(value.links) &&
+    Array.isArray(value.socialIcons)
+  );
+}
+
 export default function AdminDashboard() {
   const [page, setPage] = useState<AdminPage | null>(null);
   const [tab, setTab] = useState<TabId>("links");
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">(
-    "idle"
-  );
+  const [saveState, setSaveState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    fetch("/api/page")
-      .then((res) => res.json())
-      .then((data) => setPage(data))
-      .catch(() => setSaveState("error"));
-  }, []);
+    const controller = new AbortController();
 
-  const savePageDebounced = useDebouncedCallback(async (data: Record<string, unknown>) => {
-    setSaveState("saving");
-    try {
-      const res = await fetch("/api/page", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        if (data.username) setUsernameError(json.error);
-        setSaveState("error");
-        return;
+    async function loadPage() {
+      setLoadError(null);
+
+      try {
+        const response = await fetch("/api/page", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        const data: unknown = await response.json().catch(() => null);
+
+        if (response.status === 401) {
+          window.location.assign("/login");
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            getApiError(data, `Não foi possível carregar o painel (${response.status}).`)
+          );
+        }
+
+        if (!isAdminPage(data)) {
+          throw new Error("A API retornou dados incompletos para o painel.");
+        }
+
+        setPage(data);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+
+        console.error("[admin] Erro ao carregar /api/page:", error);
+        setPage(null);
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar o painel."
+        );
       }
-      setUsernameError(null);
-      setSaveState("saved");
-    } catch {
-      setSaveState("error");
     }
-  }, 700);
+
+    void loadPage();
+
+    return () => controller.abort();
+  }, [reloadKey]);
+
+  const savePageDebounced = useDebouncedCallback(
+    async (data: Record<string, unknown>) => {
+      setSaveState("saving");
+
+      try {
+        const response = await fetch("/api/page", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const json: unknown = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          if (data.username) {
+            setUsernameError(getApiError(json, "Não foi possível alterar o usuário."));
+          }
+          setSaveState("error");
+          return;
+        }
+
+        setUsernameError(null);
+        setSaveState("saved");
+      } catch (error) {
+        console.error("[admin] Erro ao salvar página:", error);
+        setSaveState("error");
+      }
+    },
+    700
+  );
 
   function updatePage(data: Record<string, unknown>) {
-    setPage((prev) => (prev ? { ...prev, ...data } : prev));
+    setPage((previous) => (previous ? { ...previous, ...data } : previous));
     savePageDebounced(data);
   }
 
   // ---- Links ----
-  async function addLink(label: string, url: string) {
-    const res = await fetch("/api/links", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label, url }),
-    });
-    const link = await res.json();
-    if (res.ok) {
-      setPage((prev) => (prev ? { ...prev, links: [...prev.links, link] } : prev));
+  async function addLink(label: string, url: string, icon?: string | null) {
+    try {
+      const response = await fetch("/api/links", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label, url, icon: icon ?? null }),
+      });
+      const link: unknown = await response.json().catch(() => null);
+
+      if (!response.ok || !isRecord(link)) {
+        setSaveState("error");
+        return;
+      }
+
+      setPage((previous) =>
+        previous
+          ? { ...previous, links: [...previous.links, link as LinkItemData] }
+          : previous
+      );
+    } catch (error) {
+      console.error("[admin] Erro ao adicionar link:", error);
+      setSaveState("error");
     }
   }
 
   const patchLinkDebounced = useDebouncedCallback(
     async (id: string, data: Partial<LinkItemData>) => {
-      await fetch(`/api/links/${id}`, {
+      const response = await fetch(`/api/links/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+
+      if (!response.ok) setSaveState("error");
     },
     500
   );
 
   function updateLink(id: string, data: Partial<LinkItemData>) {
-    setPage((prev) =>
-      prev
+    setPage((previous) =>
+      previous
         ? {
-            ...prev,
-            links: prev.links.map((l) => (l.id === id ? { ...l, ...data } : l)),
+            ...previous,
+            links: previous.links.map((link) =>
+              link.id === id ? { ...link, ...data } : link
+            ),
           }
-        : prev
+        : previous
     );
     patchLinkDebounced(id, data);
   }
 
   async function deleteLink(id: string) {
-    setPage((prev) =>
-      prev ? { ...prev, links: prev.links.filter((l) => l.id !== id) } : prev
+    setPage((previous) =>
+      previous
+        ? { ...previous, links: previous.links.filter((link) => link.id !== id) }
+        : previous
     );
-    await fetch(`/api/links/${id}`, { method: "DELETE" });
+
+    const response = await fetch(`/api/links/${id}`, { method: "DELETE" });
+    if (!response.ok) setSaveState("error");
   }
 
   async function reorderLinks(orderedIds: string[]) {
-    setPage((prev) => {
-      if (!prev) return prev;
-      const byId = new Map(prev.links.map((l) => [l.id, l]));
+    setPage((previous) => {
+      if (!previous) return previous;
+
+      const byId = new Map(previous.links.map((link) => [link.id, link]));
       const reordered = orderedIds
         .map((id, index) => {
-          const l = byId.get(id);
-          return l ? { ...l, order: index } : null;
+          const link = byId.get(id);
+          return link ? { ...link, order: index } : null;
         })
         .filter(Boolean) as LinkItemData[];
-      return { ...prev, links: reordered };
+
+      return { ...previous, links: reordered };
     });
-    await fetch("/api/links/reorder", {
+
+    const response = await fetch("/api/links/reorder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ orderedIds }),
     });
+
+    if (!response.ok) setSaveState("error");
   }
 
   // ---- Redes sociais ----
   async function addSocial(platform: string, url: string) {
-    const res = await fetch("/api/social-icons", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ platform, url }),
-    });
-    const icon = await res.json();
-    if (res.ok) {
-      setPage((prev) =>
-        prev ? { ...prev, socialIcons: [...prev.socialIcons, icon] } : prev
+    try {
+      const response = await fetch("/api/social-icons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform, url }),
+      });
+      const icon: unknown = await response.json().catch(() => null);
+
+      if (!response.ok || !isRecord(icon)) {
+        setSaveState("error");
+        return;
+      }
+
+      setPage((previous) =>
+        previous
+          ? {
+              ...previous,
+              socialIcons: [...previous.socialIcons, icon as SocialIconData],
+            }
+          : previous
       );
+    } catch (error) {
+      console.error("[admin] Erro ao adicionar rede social:", error);
+      setSaveState("error");
     }
   }
 
   const patchSocialDebounced = useDebouncedCallback(
     async (id: string, data: Partial<SocialIconData>) => {
-      await fetch(`/api/social-icons/${id}`, {
+      const response = await fetch(`/api/social-icons/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+
+      if (!response.ok) setSaveState("error");
     },
     500
   );
 
   function updateSocial(id: string, data: Partial<SocialIconData>) {
-    setPage((prev) =>
-      prev
+    setPage((previous) =>
+      previous
         ? {
-            ...prev,
-            socialIcons: prev.socialIcons.map((s) =>
-              s.id === id ? { ...s, ...data } : s
+            ...previous,
+            socialIcons: previous.socialIcons.map((social) =>
+              social.id === id ? { ...social, ...data } : social
             ),
           }
-        : prev
+        : previous
     );
     patchSocialDebounced(id, data);
   }
 
   async function deleteSocial(id: string) {
-    setPage((prev) =>
-      prev
-        ? { ...prev, socialIcons: prev.socialIcons.filter((s) => s.id !== id) }
-        : prev
+    setPage((previous) =>
+      previous
+        ? {
+            ...previous,
+            socialIcons: previous.socialIcons.filter((social) => social.id !== id),
+          }
+        : previous
     );
-    await fetch(`/api/social-icons/${id}`, { method: "DELETE" });
+
+    const response = await fetch(`/api/social-icons/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) setSaveState("error");
   }
 
   const previewTheme: PageTheme | null = useMemo(() => {
     if (!page) return null;
-    const { links: _l, socialIcons: _s, isPublished: _p, ...theme } = page;
-    void _l;
-    void _s;
-    void _p;
+
+    const { links: _links, socialIcons: _socials, isPublished: _published, ...theme } =
+      page;
+    void _links;
+    void _socials;
+    void _published;
+
     return theme;
   }, [page]);
+
+  if (loadError) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="max-w-xl rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
+          <h1 className="text-lg font-semibold text-red-300">
+            Não foi possível abrir o painel
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-neutral-300">{loadError}</p>
+          <p className="mt-3 text-xs leading-5 text-neutral-500">
+            Verifique DATABASE_URL, rode as migrations do Prisma e confirme que a
+            sessão ainda está válida.
+          </p>
+          <button
+            type="button"
+            onClick={() => setReloadKey((value) => value + 1)}
+            className="mt-5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-emerald-400"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!page || !previewTheme) {
     return (
@@ -194,21 +352,22 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-[1fr_320px] gap-8">
-      <div>
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex gap-1 bg-neutral-900 border border-neutral-800 rounded-xl p-1">
-            {TABS.map((t) => (
+    <div className="mx-auto grid max-w-[1440px] gap-8 px-4 py-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,390px)]">
+      <div className="min-w-0">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex max-w-full gap-1 overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-900 p-1">
+            {TABS.map((item) => (
               <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
+                type="button"
+                key={item.id}
+                onClick={() => setTab(item.id)}
                 className={`text-sm px-3.5 py-1.5 rounded-lg transition ${
-                  tab === t.id
+                  tab === item.id
                     ? "bg-emerald-500 text-black font-medium"
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
-                {t.label}
+                {item.label}
               </button>
             ))}
           </div>
@@ -244,6 +403,7 @@ export default function AdminDashboard() {
             bgImage={page.bgImage}
             overlayOpacity={page.overlayOpacity}
             fontFamily={page.fontFamily}
+            fontSize={page.fontSize ?? 16}
             textColor={page.textColor}
             bioColor={page.bioColor}
             accentColor={page.accentColor}
@@ -251,6 +411,7 @@ export default function AdminDashboard() {
             buttonBorderColor={page.buttonBorderColor}
             buttonTextColor={page.buttonTextColor}
             buttonRadius={page.buttonRadius}
+            buttonSize={page.buttonSize ?? "medium"}
             buttonShadowColor={page.buttonShadowColor}
             hoverBgColor={page.hoverBgColor}
             hoverGlowColor={page.hoverGlowColor}
@@ -274,20 +435,30 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="hidden lg:block">
-        <LivePreview theme={previewTheme} links={page.links} socials={page.socialIcons} />
+      <div className="min-w-0">
+        <LivePreview
+          theme={previewTheme}
+          links={page.links}
+          socials={page.socialIcons}
+        />
       </div>
     </div>
   );
 }
 
-function SaveIndicator({ state }: { state: "idle" | "saving" | "saved" | "error" }) {
+function SaveIndicator({
+  state,
+}: {
+  state: "idle" | "saving" | "saved" | "error";
+}) {
   if (state === "idle") return null;
+
   const map = {
     saving: { text: "Salvando...", color: "text-neutral-500" },
     saved: { text: "Salvo ✓", color: "text-emerald-400" },
     error: { text: "Erro ao salvar", color: "text-red-400" },
   } as const;
+
   const { text, color } = map[state];
   return <span className={`text-xs ${color}`}>{text}</span>;
 }
