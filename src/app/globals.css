@@ -1820,7 +1820,7 @@ button {
 .live-preview-stage {
   position: relative;
   display: grid;
-  min-height: 665px;
+  min-height: 700px;
   padding: 26px 18px 20px;
   overflow: hidden;
   place-items: start center;
@@ -1846,7 +1846,7 @@ button {
   position: relative;
   z-index: 1;
   width: min(100%, 302px);
-  height: 600px;
+  aspect-ratio: 375 / 812;
   padding: 9px;
   border: 1px solid rgba(255, 255, 255, 0.17);
   border-radius: 39px;
@@ -1924,7 +1924,7 @@ button {
 }
 
 .live-preview.is-embedded .live-preview-stage {
-  min-height: 640px;
+  min-height: 675px;
   padding-top: 20px;
   background: transparent;
 }
@@ -2475,13 +2475,12 @@ button {
   }
 
   .live-preview.is-embedded .live-preview-stage {
-    min-height: 590px;
+    min-height: 655px;
     padding: 14px 10px 20px;
   }
 
   .live-preview-phone {
     width: min(100%, 286px);
-    height: 565px;
   }
 
   .admin-preview-sheet {

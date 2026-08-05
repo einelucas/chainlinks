@@ -35,6 +35,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-dvh flex items-center justify-center bg-neutral-950 px-4">
       <div className="w-full max-w-sm">
+        <div className="flex justify-center mb-8">
+          <Link href="/" className="brand" aria-label="LinkPage — início">
+            <span className="brand-mark" aria-hidden="true">
+              L
+            </span>
+            <span>LinkPage</span>
+          </Link>
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white">Bem-vindo de volta</h1>
           <p className="text-neutral-400 text-sm mt-2">
@@ -85,7 +94,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-neutral-500 mt-4">
+        <p className="text-center text-sm text-neutral-400 mt-4">
           Não tem conta?{" "}
           <Link href="/register" className="text-emerald-400 hover:underline">
             Criar conta

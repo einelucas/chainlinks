@@ -118,7 +118,7 @@ html {
   border-radius: 12px;
   color: #02150e;
   font-weight: 850;
-  background: linear-gradient(145deg, var(--mint), var(--green));
+  background: linear-gradient(145deg, var(--mint, #83f3c6), var(--green, #00c989));
   box-shadow: 0 9px 30px rgba(0, 201, 137, 0.2);
 }
 
@@ -2316,7 +2316,7 @@ html {
   }
 
   .feature-card-device {
-    min-height: 510px;
+    min-height: 450px;
   }
 
   .device-stage {

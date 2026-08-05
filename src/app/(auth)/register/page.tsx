@@ -58,6 +58,15 @@ export default function RegisterPage() {
   return (
     <div className="min-h-dvh flex items-center justify-center bg-neutral-950 px-4">
       <div className="w-full max-w-sm">
+        <div className="flex justify-center mb-8">
+          <Link href="/" className="brand" aria-label="LinkPage — início">
+            <span className="brand-mark" aria-hidden="true">
+              L
+            </span>
+            <span>LinkPage</span>
+          </Link>
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white">Crie sua página</h1>
           <p className="text-neutral-400 text-sm mt-2">
@@ -92,7 +101,7 @@ export default function RegisterPage() {
               Nome de usuário
             </label>
             <div className="flex items-center rounded-lg bg-neutral-800 border border-neutral-700 focus-within:ring-2 focus-within:ring-emerald-500">
-              <span className="pl-3 text-neutral-500 text-sm">/</span>
+              <span className="pl-3 text-neutral-400 text-sm">/</span>
               <input
                 type="text"
                 required
@@ -107,7 +116,7 @@ export default function RegisterPage() {
                 placeholder="seu-usuario"
               />
             </div>
-            <p className="text-xs text-neutral-500 mt-1">
+            <p className="text-xs text-neutral-400 mt-1">
               Sua página ficará em: /{form.username || "seu-usuario"}
             </p>
           </div>
@@ -146,7 +155,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-neutral-500 mt-4">
+        <p className="text-center text-sm text-neutral-400 mt-4">
           Já tem conta?{" "}
           <Link href="/login" className="text-emerald-400 hover:underline">
             Entrar

@@ -11,6 +11,7 @@
 
 .published {
   min-height: 100dvh;
+  align-items: center;
   padding-top: clamp(36px, 7vw, 72px);
   padding-right: max(16px, env(safe-area-inset-right));
   padding-bottom: max(36px, env(safe-area-inset-bottom));
