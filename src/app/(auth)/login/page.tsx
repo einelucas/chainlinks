@@ -4,13 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { createClient } from "@/utils/supabase/client";
 
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
-  AccessDenied: "Não foi possível continuar com o Google. Tente novamente.",
-  OAuthSignin: "Não foi possível iniciar o login com Google. Tente novamente.",
-  OAuthCallback: "Falha ao concluir o login com Google. Tente novamente.",
-  Configuration: "Login com Google indisponível no momento.",
+  oauth_callback_error: "Não foi possível continuar com o Google. Tente novamente.",
 };
 
 function GoogleIcon() {
@@ -60,13 +57,13 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const result = await signIn("credentials", {
+    const supabase = createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email: form.email,
       password: form.password,
-      redirect: false,
     });
 
-    if (result?.error) {
+    if (signInError) {
       setError("Email ou senha incorretos");
       setLoading(false);
       return;
@@ -82,7 +79,15 @@ export default function LoginPage() {
     setIsGoogleLoading(true);
 
     try {
-      await signIn("google", { callbackUrl: "/admin" });
+      const supabase = createClient();
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/admin`,
+        },
+      });
+
+      if (oauthError) throw oauthError;
     } catch (err) {
       console.error("Erro ao entrar com Google:", err);
       setError("Não foi possível continuar com o Google. Tente novamente.");

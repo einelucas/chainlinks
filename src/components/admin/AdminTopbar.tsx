@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 import { ExternalIcon, LogoutIcon } from "./AdminIcons";
 import ThemeToggle from "./ThemeToggle";
 
@@ -16,6 +17,14 @@ export default function AdminTopbar({
   initialTheme: "light" | "dark";
 }) {
   const initial = (userName || username || "C").trim().charAt(0).toUpperCase();
+  const router = useRouter();
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <header className="admin-topbar">
@@ -54,7 +63,7 @@ export default function AdminTopbar({
 
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={handleSignOut}
             className="admin-icon-button admin-logout-button"
             aria-label="Sair da conta"
             title="Sair da conta"

@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
 
@@ -14,7 +17,7 @@ export async function POST(req: Request) {
   }
 
   const page = await prisma.page.findUnique({
-    where: { userId: session.user.id },
+    where: { userId: user.id },
     include: { links: true },
   });
   if (!page) {

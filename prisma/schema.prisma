@@ -15,28 +15,16 @@ datasource db {
   // directUrl = env("DIRECT_URL")
 }
 
-// ---------- Autenticação ----------
-
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  password      String? // hash bcrypt; nulo para contas criadas via OAuth (ex: Google)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  page Page?
-
-  @@map("users")
-}
-
 // ---------- Página pública (o "linktree" de cada usuário) ----------
+//
+// A autenticação/identidade do usuário vive no Supabase Auth (auth.users),
+// um banco Postgres separado deste (Neon). Por isso `userId` não é uma
+// foreign key de verdade — é o UUID de auth.users.id do Supabase, mantido
+// consistente só a nível de aplicação (ver src/lib/ensure-page.ts).
 
 model Page {
   id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique // auth.users.id do Supabase
 
   // Identidade
   username     String  @unique // usada na URL pública: /username

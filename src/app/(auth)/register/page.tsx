@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { createClient } from "@/utils/supabase/client";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,36 +15,49 @@ export default function RegisterPage() {
     password: "",
   });
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setLoading(true);
 
     try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
+      const availability = await fetch(
+        `/api/username-available?u=${encodeURIComponent(form.username)}`
+      ).then((res) => res.json());
 
-      if (!res.ok) {
-        setError(data.error ?? "Erro ao criar conta");
+      if (!availability.available) {
+        setError(availability.error ?? "Este nome de usuário já está em uso");
         setLoading(false);
         return;
       }
 
-      // Login automático após o cadastro
-      const loginResult = await signIn("credentials", {
+      const supabase = createClient();
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        redirect: false,
+        options: {
+          data: { name: form.name, username: form.username },
+        },
       });
 
-      if (loginResult?.error) {
-        router.push("/login");
+      if (signUpError) {
+        setError(
+          signUpError.message === "User already registered"
+            ? "Este email já está cadastrado"
+            : "Erro ao criar conta. Tente novamente."
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (!data.session) {
+        // Projeto Supabase exige confirmação por e-mail antes de criar sessão
+        setInfo("Enviamos um link de confirmação para o seu email. Confirme para continuar.");
+        setLoading(false);
         return;
       }
 
@@ -80,6 +93,12 @@ export default function RegisterPage() {
           {error && (
             <div className="text-sm text-red-400 bg-red-950/50 border border-red-900 rounded-lg px-3 py-2">
               {error}
+            </div>
+          )}
+
+          {info && (
+            <div className="text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-900 rounded-lg px-3 py-2">
+              {info}
             </div>
           )}
 

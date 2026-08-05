@@ -1,9 +1,10 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { usernameSchema } from "@/lib/validation";
 import { PROFILE_IMAGE_SIZE_MAX, PROFILE_IMAGE_SIZE_MIN } from "@/lib/types";
+import { ensurePageForUser } from "@/lib/ensure-page";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -29,19 +30,35 @@ function databaseError(error: unknown, action: string) {
 
 export async function GET() {
   try {
-    const session = await auth();
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const page = await prisma.page.findUnique({
-      where: { userId: session.user.id },
+    let page = await prisma.page.findUnique({
+      where: { userId: user.id },
       include: {
         links: { orderBy: { order: "asc" } },
         socialIcons: { orderBy: { order: "asc" } },
       },
     });
+
+    if (!page) {
+      // Primeira vez que este usuário autenticado acessa o painel (ex: veio
+      // direto do login com Google, sem passar pelo formulário de cadastro).
+      await ensurePageForUser(user);
+      page = await prisma.page.findUnique({
+        where: { userId: user.id },
+        include: {
+          links: { orderBy: { order: "asc" } },
+          socialIcons: { orderBy: { order: "asc" } },
+        },
+      });
+    }
 
     if (!page) {
       return NextResponse.json(
@@ -92,9 +109,12 @@ const EDITABLE_FIELDS = [
 
 export async function PATCH(request: Request) {
   try {
-    const session = await auth();
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
@@ -122,7 +142,7 @@ export async function PATCH(request: Request) {
         select: { userId: true },
       });
 
-      if (existing && existing.userId !== session.user.id) {
+      if (existing && existing.userId !== user.id) {
         return NextResponse.json(
           { error: "Este nome de usuário já está em uso" },
           { status: 409 }
@@ -192,7 +212,7 @@ export async function PATCH(request: Request) {
     }
 
     const updated = await prisma.page.update({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       data,
     });
 

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 import AdminTopbar from "@/components/admin/AdminTopbar";
 
@@ -9,11 +9,17 @@ export default async function AdminLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session?.user?.id) {
+  if (!user) {
     redirect("/login");
   }
+
+  const userName =
+    typeof user.user_metadata?.name === "string" ? user.user_metadata.name : "";
 
   // O layout não deve impedir a renderização inteira caso o banco esteja
   // temporariamente indisponível. A página e a API exibem o erro controlado.
@@ -21,7 +27,7 @@ export default async function AdminLayout({
 
   try {
     const page = await prisma.page.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       select: { username: true },
     });
 
@@ -38,7 +44,7 @@ export default async function AdminLayout({
     <div className="admin-root" data-theme={theme} suppressHydrationWarning>
       <AdminTopbar
         username={username}
-        userName={session.user.name ?? ""}
+        userName={userName}
         initialTheme={isLight ? "light" : "dark"}
       />
       <div className="admin-content-root">{children}</div>
