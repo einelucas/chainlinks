@@ -18,11 +18,22 @@ export type SocialIconData = {
 export const BUTTON_SIZE_OPTIONS = ["small", "medium", "large"] as const;
 export type ButtonSize = (typeof BUTTON_SIZE_OPTIONS)[number];
 
+export const PROFILE_IMAGE_SIZE_MIN = 64;
+export const PROFILE_IMAGE_SIZE_MAX = 200;
+export const PROFILE_IMAGE_SIZE_DEFAULT = 104;
+export const PROFILE_IMAGE_SIZE_PRESETS = [
+  { value: 72, label: "Pequena" },
+  { value: 104, label: "Média" },
+  { value: 140, label: "Grande" },
+  { value: 180, label: "Extra grande" },
+] as const;
+
 export type PageTheme = {
   username: string;
   displayName: string;
   bio: string;
   profileImage?: string | null;
+  profileImageSize: number;
 
   bgType: string;
   bgColor: string;

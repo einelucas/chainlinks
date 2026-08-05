@@ -1,28 +1,45 @@
 "use client";
 
 import { useState } from "react";
+import {
+  PROFILE_IMAGE_SIZE_MAX,
+  PROFILE_IMAGE_SIZE_MIN,
+  PROFILE_IMAGE_SIZE_PRESETS,
+} from "@/lib/types";
 import { EyeIcon, ProfileIcon } from "./AdminIcons";
 import ImageUploadField from "./ImageUploadField";
+import RangeControl from "./RangeControl";
 
 type Props = {
   username: string;
   displayName: string;
   bio: string;
   profileImage?: string | null;
+  profileImageSize: number;
   isPublished: boolean;
   onUpdate: (data: Record<string, unknown>) => void;
   usernameError?: string | null;
 };
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
 
 export default function ProfileTab({
   username,
   displayName,
   bio,
   profileImage,
+  profileImageSize,
   isPublished,
   onUpdate,
   usernameError,
 }: Props) {
+  const imageSize = clamp(
+    Number.isFinite(profileImageSize) ? profileImageSize : 104,
+    PROFILE_IMAGE_SIZE_MIN,
+    PROFILE_IMAGE_SIZE_MAX
+  );
   const [localUsername, setLocalUsername] = useState(username);
 
   return (
@@ -42,6 +59,36 @@ export default function ProfileTab({
           value={profileImage}
           onChange={(dataUrl) => onUpdate({ profileImage: dataUrl })}
         />
+
+        <div className="appearance-field-group">
+          <span className="appearance-field-label">Tamanho da foto</span>
+          <div className="appearance-choice-grid appearance-size-choices appearance-image-size-choices">
+            {PROFILE_IMAGE_SIZE_PRESETS.map((preset) => (
+              <button
+                type="button"
+                key={preset.value}
+                onClick={() => onUpdate({ profileImageSize: preset.value })}
+                className={`appearance-size-choice ${imageSize === preset.value ? "is-active" : ""}`}
+              >
+                <i className={`profile-size-demo is-${preset.value}`} />
+                <strong>{preset.label}</strong>
+                <small>{preset.value}px</small>
+              </button>
+            ))}
+          </div>
+
+          <RangeControl
+            label="Ajuste livre"
+            valueLabel={`${imageSize}px`}
+            min={PROFILE_IMAGE_SIZE_MIN}
+            max={PROFILE_IMAGE_SIZE_MAX}
+            step={2}
+            value={imageSize}
+            onChange={(value) => onUpdate({ profileImageSize: value })}
+            minLabel={`${PROFILE_IMAGE_SIZE_MIN}px`}
+            maxLabel={`${PROFILE_IMAGE_SIZE_MAX}px`}
+          />
+        </div>
 
         <div className="editor-field-grid">
           <label className="editor-field">

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { usernameSchema } from "@/lib/validation";
+import { PROFILE_IMAGE_SIZE_MAX, PROFILE_IMAGE_SIZE_MIN } from "@/lib/types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -61,6 +62,7 @@ const EDITABLE_FIELDS = [
   "displayName",
   "bio",
   "profileImage",
+  "profileImageSize",
   "favicon",
   "bgType",
   "bgColor",
@@ -146,6 +148,20 @@ export async function PATCH(request: Request) {
     ) {
       return NextResponse.json(
         { error: "O arredondamento deve estar entre 0 e 50px." },
+        { status: 400 }
+      );
+    }
+
+    if (
+      "profileImageSize" in body &&
+      (!Number.isInteger(body.profileImageSize) ||
+        Number(body.profileImageSize) < PROFILE_IMAGE_SIZE_MIN ||
+        Number(body.profileImageSize) > PROFILE_IMAGE_SIZE_MAX)
+    ) {
+      return NextResponse.json(
+        {
+          error: `O tamanho da foto deve estar entre ${PROFILE_IMAGE_SIZE_MIN} e ${PROFILE_IMAGE_SIZE_MAX}px.`,
+        },
         { status: 400 }
       );
     }

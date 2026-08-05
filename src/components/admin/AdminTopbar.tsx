@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { ExternalIcon, LogoutIcon } from "./AdminIcons";
+import ThemeToggle from "./ThemeToggle";
 
 export default function AdminTopbar({
   username,
   userName,
+  initialTheme,
 }: {
   username?: string | null;
   userName: string;
+  initialTheme: "light" | "dark";
 }) {
   const initial = (userName || username || "L").trim().charAt(0).toUpperCase();
 
@@ -45,6 +48,8 @@ export default function AdminTopbar({
               <span>Ver página</span>
             </Link>
           ) : null}
+
+          <ThemeToggle initialTheme={initialTheme} />
 
           <button
             type="button"

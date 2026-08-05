@@ -103,6 +103,23 @@ export function LogoutIcon(props: IconProps) {
   );
 }
 
+export function SunIcon(props: IconProps) {
+  return (
+    <svg {...iconProps(props)}>
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 3v2M12 19v2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M3 12h2M19 12h2M5.2 18.8l1.4-1.4M17.4 6.6l1.4-1.4" />
+    </svg>
+  );
+}
+
+export function MoonIcon(props: IconProps) {
+  return (
+    <svg {...iconProps(props)}>
+      <path d="M20 14.3A8.3 8.3 0 1 1 9.7 4a6.7 6.7 0 0 0 10.3 10.3Z" />
+    </svg>
+  );
+}
+
 export function PlusIcon(props: IconProps) {
   return (
     <svg {...iconProps(props)}>

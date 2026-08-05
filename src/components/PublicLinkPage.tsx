@@ -9,6 +9,11 @@ import type {
   SocialIconData,
 } from "@/lib/types";
 import {
+  PROFILE_IMAGE_SIZE_DEFAULT,
+  PROFILE_IMAGE_SIZE_MAX,
+  PROFILE_IMAGE_SIZE_MIN,
+} from "@/lib/types";
+import {
   PLATFORM_ICON_MAP,
   ShareIcon,
   QrIcon,
@@ -41,6 +46,7 @@ type ThemeStyle = CSSProperties & {
   "--hover-glow": string;
   "--hover-scale": number;
   "--font": string;
+  "--profile-image-size": string;
 };
 
 const BUTTON_SIZE_STYLE: Record<
@@ -64,6 +70,11 @@ function normalizeFontFamily(fontFamily: string): string {
 function normalizeButtonSize(buttonSize: string | undefined): ButtonSize {
   if (buttonSize === "small" || buttonSize === "large") return buttonSize;
   return "medium";
+}
+
+function normalizeProfileImageSize(size: number | undefined): number {
+  if (!Number.isFinite(size)) return PROFILE_IMAGE_SIZE_DEFAULT;
+  return clamp(size as number, PROFILE_IMAGE_SIZE_MIN, PROFILE_IMAGE_SIZE_MAX);
 }
 
 function getGoogleFontUrl(fontFamily: string): string {
@@ -91,6 +102,7 @@ export default function PublicLinkPage({
   );
   const buttonSize = normalizeButtonSize(theme.buttonSize);
   const buttonMetrics = BUTTON_SIZE_STYLE[buttonSize];
+  const profileImageSize = normalizeProfileImageSize(theme.profileImageSize);
 
   useEffect(() => {
     const fontId = `chainlinks-font-${fontFamily
@@ -138,6 +150,7 @@ export default function PublicLinkPage({
     "--btn-padding-y": buttonMetrics.paddingY,
     "--btn-padding-x": buttonMetrics.paddingX,
     "--btn-min-height": buttonMetrics.minHeight,
+    "--profile-image-size": `${profileImageSize}px`,
     "--hover-bg": theme.hoverBgColor,
     "--hover-glow": theme.hoverGlowColor,
     "--hover-scale": theme.hoverScale,

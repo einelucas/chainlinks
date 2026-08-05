@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { LinkItemData, PageTheme, SocialIconData } from "@/lib/types";
+import { PROFILE_IMAGE_SIZE_DEFAULT } from "@/lib/types";
 import { useDebouncedCallback } from "@/lib/use-debounced-callback";
 import ProfileTab from "@/components/admin/ProfileTab";
 import LinksTab from "@/components/admin/LinksTab";
@@ -551,6 +552,7 @@ export default function AdminDashboard() {
                 displayName={page.displayName}
                 bio={page.bio}
                 profileImage={page.profileImage}
+                profileImageSize={page.profileImageSize ?? PROFILE_IMAGE_SIZE_DEFAULT}
                 isPublished={page.isPublished}
                 onUpdate={updatePage}
                 usernameError={usernameError}

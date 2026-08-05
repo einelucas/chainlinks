@@ -43,6 +43,7 @@ model Page {
   displayName  String  @default("Meu Perfil")
   bio          String  @default("")
   profileImage String? // data URI (base64) ou URL
+  profileImageSize Int @default(104) // px, 64-200
   favicon      String?
 
   // Layout de fundo

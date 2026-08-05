@@ -53,6 +53,7 @@ export default async function PublicPage({
     displayName: page.displayName,
     bio: page.bio,
     profileImage: page.profileImage,
+    profileImageSize: page.profileImageSize,
     bgType: page.bgType,
     bgColor: page.bgColor,
     bgGradientFrom: page.bgGradientFrom,
