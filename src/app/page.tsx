@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const editorNav = [
@@ -72,11 +73,16 @@ const faqs = [
 
 function Brand() {
   return (
-    <a className="brand" href="#inicio" aria-label="LinkPage — início">
-      <span className="brand-mark" aria-hidden="true">
-        L
-      </span>
-      <span>LinkPage</span>
+    <a className="brand" href="#inicio" aria-label="ChainLinks — início">
+      <Image
+        src="/logo-mark.png"
+        alt=""
+        width={44}
+        height={44}
+        className="brand-mark"
+        priority
+      />
+      <span>ChainLinks</span>
     </a>
   );
 }
@@ -300,7 +306,7 @@ function EditorDemo() {
                 ))}
               </div>
               <p className="preview-signature">
-                Feito com <strong>LinkPage</strong>
+                Feito com <strong>ChainLinks</strong>
               </p>
             </article>
           </div>
@@ -495,7 +501,7 @@ export default function Home() {
             <h3>Um endereço só seu</h3>
             <p>Escolha um link curto, memorável e pronto para compartilhar.</p>
             <div className="url-preview" aria-hidden="true">
-              <span>linkpage.me/</span>
+              <span>chainlinks.me/</span>
               <strong>seuusuario</strong>
               <i>✓</i>
             </div>
@@ -564,7 +570,7 @@ export default function Home() {
         <div className="section-heading examples-heading">
           <div>
             <p className="section-kicker">Feita para ser diferente</p>
-            <h2>Uma LinkPage para cada história.</h2>
+            <h2>Uma ChainLinks para cada história.</h2>
           </div>
           <p>
             Comece com uma estrutura clara e transforme tudo até ficar
@@ -636,7 +642,7 @@ export default function Home() {
 
         <article className="price-card">
           <div className="price-card-glow" aria-hidden="true" />
-          <p>LinkPage Starter</p>
+          <p>ChainLinks Starter</p>
           <h3>
             Grátis <span>para começar</span>
           </h3>
@@ -697,7 +703,7 @@ export default function Home() {
           <a href="#precos">Preços</a>
           <a href="#inicio">Voltar ao topo ↑</a>
         </nav>
-        <small>© 2026 LinkPage. Todos os direitos reservados.</small>
+        <small>© 2026 ChainLinks. Todos os direitos reservados.</small>
       </footer>
     </main>
   );

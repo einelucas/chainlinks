@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 
@@ -36,11 +37,9 @@ export default function LoginPage() {
     <div className="min-h-dvh flex items-center justify-center bg-neutral-950 px-4">
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-8">
-          <Link href="/" className="brand" aria-label="LinkPage — início">
-            <span className="brand-mark" aria-hidden="true">
-              L
-            </span>
-            <span>LinkPage</span>
+          <Link href="/" className="brand" aria-label="ChainLinks — início">
+            <Image src="/logo-mark.png" alt="" width={44} height={44} className="brand-mark" />
+            <span>ChainLinks</span>
           </Link>
         </div>
 

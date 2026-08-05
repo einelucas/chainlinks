@@ -84,7 +84,7 @@ export default async function PublicPage({
       theme={theme}
       links={page.links}
       socials={page.socialIcons}
-      pageUrl={`https://seu-dominio.com/${page.username}`}
+      pageUrl={`https://chainlinks.me/${page.username}`}
     />
   );
 }

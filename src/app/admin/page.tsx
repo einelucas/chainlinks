@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import type { LinkItemData, PageTheme, SocialIconData } from "@/lib/types";
 import { PROFILE_IMAGE_SIZE_DEFAULT } from "@/lib/types";
 import { useDebouncedCallback } from "@/lib/use-debounced-callback";
@@ -400,7 +401,9 @@ export default function AdminDashboard() {
     return (
       <div className="admin-state-page">
         <div className="admin-loading-card">
-          <span className="admin-loading-mark">L</span>
+          <span className="admin-loading-mark">
+            <Image src="/logo-mark.png" alt="" width={26} height={26} />
+          </span>
           <div>
             <strong>Preparando seu editor</strong>
             <span>Carregando página e preferências...</span>

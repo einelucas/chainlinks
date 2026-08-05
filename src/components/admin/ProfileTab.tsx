@@ -127,7 +127,7 @@ export default function ProfileTab({
         <label className="editor-field">
           <span>Endereço da sua página</span>
           <div className={`editor-url-field ${usernameError ? "has-error" : ""}`}>
-            <span>linkpage.com/</span>
+            <span>chainlinks.me/</span>
             <input
               type="text"
               value={localUsername}

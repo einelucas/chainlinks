@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { ExternalIcon, LogoutIcon } from "./AdminIcons";
@@ -14,15 +15,15 @@ export default function AdminTopbar({
   userName: string;
   initialTheme: "light" | "dark";
 }) {
-  const initial = (userName || username || "L").trim().charAt(0).toUpperCase();
+  const initial = (userName || username || "C").trim().charAt(0).toUpperCase();
 
   return (
     <header className="admin-topbar">
       <div className="admin-topbar-inner">
         <div className="admin-brand-group">
-          <Link href="/admin" className="admin-brand" aria-label="LinkPage — painel">
-            <span className="admin-brand-mark">L</span>
-            <span className="admin-brand-name">LinkPage</span>
+          <Link href="/admin" className="admin-brand" aria-label="ChainLinks — painel">
+            <Image src="/logo-mark.png" alt="" width={36} height={36} className="admin-brand-mark" />
+            <span className="admin-brand-name">ChainLinks</span>
           </Link>
 
           <span className="admin-topbar-divider" aria-hidden="true" />
@@ -31,7 +32,7 @@ export default function AdminTopbar({
             <span className="admin-account-avatar">{initial}</span>
             <span className="admin-account-copy">
               <strong>{userName || "Sua conta"}</strong>
-              <small>{username ? `linkpage.com/${username}` : "Painel administrativo"}</small>
+              <small>{username ? `chainlinks.me/${username}` : "Painel administrativo"}</small>
             </span>
           </div>
         </div>

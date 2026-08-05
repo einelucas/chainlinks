@@ -18,7 +18,7 @@ export default function LivePreview({ theme, links, socials, embedded = false }:
         <div className="live-preview-toolbar">
           <div>
             <span className="live-preview-title"><EyeIcon /> Preview ao vivo</span>
-            <small>linkpage.com/{theme.username}</small>
+            <small>chainlinks.me/{theme.username}</small>
           </div>
           <span className="live-preview-device"><DeviceIcon /> Mobile</span>
         </div>

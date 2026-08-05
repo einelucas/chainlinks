@@ -190,17 +190,10 @@ button {
 }
 
 .admin-brand-mark {
-  display: grid;
   width: 36px;
   height: 36px;
-  place-items: center;
-  border: 1px solid rgba(var(--admin-overlay-rgb), 0.13);
-  border-radius: 11px;
-  color: #03120c;
-  font-size: 16px;
-  font-weight: 800;
-  background: linear-gradient(145deg, #22efa7, #08bd7a);
-  box-shadow: 0 8px 28px rgba(16, 222, 146, 0.19);
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(16, 222, 146, 0.3));
 }
 
 .admin-brand-name {
@@ -2152,9 +2145,7 @@ button {
   height: 44px;
   place-items: center;
   border-radius: 13px;
-  color: #03120c;
-  font-weight: 800;
-  background: var(--admin-green);
+  background: var(--admin-panel-strong);
   box-shadow: 0 0 0 0 rgba(var(--admin-green-rgb), 0.3);
   animation: admin-pulse 1.6s infinite;
 }
