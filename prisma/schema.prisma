@@ -22,7 +22,7 @@ model User {
   name          String?
   email         String    @unique
   emailVerified DateTime?
-  password      String // hash bcrypt
+  password      String? // hash bcrypt; nulo para contas criadas via OAuth (ex: Google)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
