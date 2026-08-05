@@ -21,7 +21,7 @@ const examples = [
     initials: "MA",
     name: "Marina Alves",
     role: "Fotografia & direção criativa",
-    handle: "linkpage.me/marina",
+    handle: "chainlinks.me/marina",
     theme: "example-violet",
     links: ["Portfólio 2026", "Agende seu ensaio", "Bastidores no Instagram"],
   },
@@ -29,7 +29,7 @@ const examples = [
     initials: "RC",
     name: "Rafa Costa",
     role: "Treino, rotina & conteúdo",
-    handle: "linkpage.me/rafacosta",
+    handle: "chainlinks.me/rafacosta",
     theme: "example-lime",
     links: ["Meu programa online", "Vídeos novos", "Fale comigo"],
   },
@@ -37,9 +37,13 @@ const examples = [
     initials: "NS",
     name: "Nina Souza",
     role: "Design & produtos digitais",
-    handle: "linkpage.me/ninasouza",
+    handle: "chainlinks.me/ninasouza",
     theme: "example-coral",
-    links: ["Conheça meu trabalho", "Templates gratuitos", "Newsletter semanal"],
+    links: [
+      "Conheça meu trabalho",
+      "Templates gratuitos",
+      "Newsletter semanal",
+    ],
   },
 ];
 
@@ -113,10 +117,15 @@ function EditorDemo() {
         </div>
 
         <div className="editor-body">
-          <nav className="editor-rail" aria-label="Ferramentas do editor demonstrativo">
+          <nav
+            className="editor-rail"
+            aria-label="Ferramentas do editor demonstrativo"
+          >
             {editorNav.map((item) => (
               <button
-                className={item.active ? "editor-nav-item is-active" : "editor-nav-item"}
+                className={
+                  item.active ? "editor-nav-item is-active" : "editor-nav-item"
+                }
                 type="button"
                 key={item.label}
                 aria-label={item.label}
@@ -133,30 +142,56 @@ function EditorDemo() {
               <p>Fundo</p>
               <div className="swatch-row">
                 <label className="swatch swatch-bg-1">
-                  <input aria-label="Fundo preto" type="radio" name="demo-background" defaultChecked />
+                  <input
+                    aria-label="Fundo preto"
+                    type="radio"
+                    name="demo-background"
+                    defaultChecked
+                  />
                   <span>Preto</span>
                 </label>
                 <label className="swatch swatch-bg-2">
-                  <input aria-label="Fundo verde" type="radio" name="demo-background" />
+                  <input
+                    aria-label="Fundo verde"
+                    type="radio"
+                    name="demo-background"
+                  />
                   <span>Verde</span>
                 </label>
                 <label className="swatch swatch-bg-3">
-                  <input aria-label="Fundo claro" type="radio" name="demo-background" />
+                  <input
+                    aria-label="Fundo claro"
+                    type="radio"
+                    name="demo-background"
+                  />
                   <span>Claro</span>
                 </label>
               </div>
               <p>Primária</p>
               <div className="swatch-row accent-swatches">
                 <label className="swatch swatch-accent-1">
-                  <input aria-label="Cor esmeralda" type="radio" name="demo-accent" defaultChecked />
+                  <input
+                    aria-label="Cor esmeralda"
+                    type="radio"
+                    name="demo-accent"
+                    defaultChecked
+                  />
                   <span>Esmeralda</span>
                 </label>
                 <label className="swatch swatch-accent-2">
-                  <input aria-label="Cor menta" type="radio" name="demo-accent" />
+                  <input
+                    aria-label="Cor menta"
+                    type="radio"
+                    name="demo-accent"
+                  />
                   <span>Menta</span>
                 </label>
                 <label className="swatch swatch-accent-3">
-                  <input aria-label="Cor azul" type="radio" name="demo-accent" />
+                  <input
+                    aria-label="Cor azul"
+                    type="radio"
+                    name="demo-accent"
+                  />
                   <span>Azul</span>
                 </label>
               </div>
@@ -184,16 +219,35 @@ function EditorDemo() {
               <legend>Efeitos de hover</legend>
               <div className="effect-grid">
                 <label>
-                  <input aria-label="Sem efeito" type="radio" name="demo-effect" />
-                  <span>∅<small>Nenhum</small></span>
+                  <input
+                    aria-label="Sem efeito"
+                    type="radio"
+                    name="demo-effect"
+                  />
+                  <span>
+                    ∅<small>Nenhum</small>
+                  </span>
                 </label>
                 <label>
-                  <input aria-label="Efeito de elevação" type="radio" name="demo-effect" />
-                  <span>▰<small>Elevação</small></span>
+                  <input
+                    aria-label="Efeito de elevação"
+                    type="radio"
+                    name="demo-effect"
+                  />
+                  <span>
+                    ▰<small>Elevação</small>
+                  </span>
                 </label>
                 <label>
-                  <input aria-label="Efeito de borda" type="radio" name="demo-effect" defaultChecked />
-                  <span>▭<small>Borda</small></span>
+                  <input
+                    aria-label="Efeito de borda"
+                    type="radio"
+                    name="demo-effect"
+                    defaultChecked
+                  />
+                  <span>
+                    ▭<small>Borda</small>
+                  </span>
                 </label>
               </div>
               <div className="duration-row">
@@ -207,7 +261,10 @@ function EditorDemo() {
           </div>
 
           <div className="preview-workspace">
-            <article className="link-page-preview" aria-label="Prévia da página de Lucas Ferreira">
+            <article
+              className="link-page-preview"
+              aria-label="Prévia da página de Lucas Ferreira"
+            >
               <div className="preview-profile">
                 <div className="profile-avatar" aria-hidden="true">
                   LF
@@ -226,7 +283,11 @@ function EditorDemo() {
               <div className="preview-links">
                 {previewLinks.map((link) => (
                   <a
-                    className={link.featured ? "preview-link is-featured" : "preview-link"}
+                    className={
+                      link.featured
+                        ? "preview-link is-featured"
+                        : "preview-link"
+                    }
                     href="#recursos"
                     key={link.label}
                   >
@@ -291,14 +352,20 @@ export default function Home() {
             <span>Totalmente seu.</span>
           </h1>
           <p className="hero-description">
-            Crie uma página de links com a sua identidade — personalize cores, fontes e efeitos em
-            minutos, sem precisar programar.
+            Crie uma página de links com a sua identidade — personalize cores,
+            fontes e efeitos em minutos, sem precisar programar.
           </p>
           <div className="hero-actions">
-            <Link className="button button-primary button-large" href="/register">
+            <Link
+              className="button button-primary button-large"
+              href="/register"
+            >
               Começar grátis
             </Link>
-            <a className="button button-secondary button-large" href="#demonstracao">
+            <a
+              className="button button-secondary button-large"
+              href="#demonstracao"
+            >
               <span className="play-dot" aria-hidden="true">
                 ▶
               </span>
@@ -306,7 +373,8 @@ export default function Home() {
             </a>
           </div>
           <p className="hero-note">
-            <span aria-hidden="true">✓</span> Sem cartão <i>•</i> Pronto em minutos
+            <span aria-hidden="true">✓</span> Sem cartão <i>•</i> Pronto em
+            minutos
           </p>
         </div>
 
@@ -348,8 +416,8 @@ export default function Home() {
           <p className="section-kicker">Tudo no mesmo painel</p>
           <h2>O seu estilo, em cada detalhe.</h2>
           <p>
-            Uma experiência simples para criar, organizar e publicar uma página que realmente tem a
-            sua cara.
+            Uma experiência simples para criar, organizar e publicar uma página
+            que realmente tem a sua cara.
           </p>
         </div>
 
@@ -359,7 +427,8 @@ export default function Home() {
               <span className="feature-number">01</span>
               <h3>Editor visual em tempo real</h3>
               <p>
-                Teste combinações, compare resultados e veja cada mudança antes de publicar.
+                Teste combinações, compare resultados e veja cada mudança antes
+                de publicar.
               </p>
             </div>
             <div className="mini-editor" aria-hidden="true">
@@ -378,9 +447,15 @@ export default function Home() {
                     <i />
                     <i />
                   </div>
-                  <span className="mini-field">Manrope Bold <b>⌄</b></span>
-                  <span className="mini-field">Borda suave <b>⌄</b></span>
-                  <span className="mini-slider"><i /></span>
+                  <span className="mini-field">
+                    Manrope Bold <b>⌄</b>
+                  </span>
+                  <span className="mini-field">
+                    Borda suave <b>⌄</b>
+                  </span>
+                  <span className="mini-slider">
+                    <i />
+                  </span>
                 </div>
                 <div className="mini-page">
                   <div className="mini-avatar">L</div>
@@ -401,9 +476,15 @@ export default function Home() {
             <h3>Links sem complicação</h3>
             <p>Adicione, reorganize e ative cada destino com poucos cliques.</p>
             <div className="link-stack" aria-hidden="true">
-              <span><i>⋮⋮</i> Meu portfólio <b>●</b></span>
-              <span><i>⋮⋮</i> Último vídeo <b>●</b></span>
-              <span><i>⋮⋮</i> Fale comigo <b>●</b></span>
+              <span>
+                <i>⋮⋮</i> Meu portfólio <b>●</b>
+              </span>
+              <span>
+                <i>⋮⋮</i> Último vídeo <b>●</b>
+              </span>
+              <span>
+                <i>⋮⋮</i> Fale comigo <b>●</b>
+              </span>
             </div>
           </article>
 
@@ -414,7 +495,9 @@ export default function Home() {
             <h3>Um endereço só seu</h3>
             <p>Escolha um link curto, memorável e pronto para compartilhar.</p>
             <div className="url-preview" aria-hidden="true">
-              <span>linkpage.me/</span><strong>seuusuario</strong><i>✓</i>
+              <span>linkpage.me/</span>
+              <strong>seuusuario</strong>
+              <i>✓</i>
             </div>
           </article>
 
@@ -422,7 +505,10 @@ export default function Home() {
             <div className="feature-copy">
               <span className="feature-number">04</span>
               <h3>Bonita em qualquer tela</h3>
-              <p>Seu conteúdo se adapta de forma automática, do celular ao desktop.</p>
+              <p>
+                Seu conteúdo se adapta de forma automática, do celular ao
+                desktop.
+              </p>
             </div>
             <div className="device-stage" aria-hidden="true">
               <div className="device-card device-desktop">
@@ -466,7 +552,9 @@ export default function Home() {
             <span>03</span>
             <div>
               <h3>Publique e compartilhe</h3>
-              <p>Coloque o link na bio e atualize sua página sempre que precisar.</p>
+              <p>
+                Coloque o link na bio e atualize sua página sempre que precisar.
+              </p>
             </div>
           </li>
         </ol>
@@ -479,13 +567,17 @@ export default function Home() {
             <h2>Uma LinkPage para cada história.</h2>
           </div>
           <p>
-            Comece com uma estrutura clara e transforme tudo até ficar exatamente do seu jeito.
+            Comece com uma estrutura clara e transforme tudo até ficar
+            exatamente do seu jeito.
           </p>
         </div>
 
         <div className="examples-grid">
           {examples.map((example) => (
-            <article className={`example-shell ${example.theme}`} key={example.name}>
+            <article
+              className={`example-shell ${example.theme}`}
+              key={example.name}
+            >
               <div className="example-browser-bar" aria-hidden="true">
                 <span />
                 <span />
@@ -497,12 +589,18 @@ export default function Home() {
                 <h3>{example.name}</h3>
                 <p>{example.role}</p>
                 <div className="example-socials" aria-hidden="true">
-                  <span>◎</span><span>↗</span><span>▶</span>
+                  <span>◎</span>
+                  <span>↗</span>
+                  <span>▶</span>
                 </div>
                 <div className="example-links">
                   {example.links.map((link, index) => (
-                    <span className={index === 0 ? "is-primary" : ""} key={link}>
-                      {link}<b>›</b>
+                    <span
+                      className={index === 0 ? "is-primary" : ""}
+                      key={link}
+                    >
+                      {link}
+                      <b>›</b>
                     </span>
                   ))}
                 </div>
@@ -517,22 +615,34 @@ export default function Home() {
           <p className="section-kicker">Comece sem compromisso</p>
           <h2>Seu próximo clique começa aqui.</h2>
           <p>
-            Monte sua primeira página, teste o editor visual e publique quando estiver do seu jeito.
+            Monte sua primeira página, teste o editor visual e publique quando
+            estiver do seu jeito.
           </p>
           <ul>
-            <li><span>✓</span> Editor visual completo</li>
-            <li><span>✓</span> Página responsiva</li>
-            <li><span>✓</span> Links organizáveis</li>
-            <li><span>✓</span> Atualizações quando quiser</li>
+            <li>
+              <span>✓</span> Editor visual completo
+            </li>
+            <li>
+              <span>✓</span> Página responsiva
+            </li>
+            <li>
+              <span>✓</span> Links organizáveis
+            </li>
+            <li>
+              <span>✓</span> Atualizações quando quiser
+            </li>
           </ul>
         </div>
 
         <article className="price-card">
           <div className="price-card-glow" aria-hidden="true" />
           <p>LinkPage Starter</p>
-          <h3>Grátis <span>para começar</span></h3>
+          <h3>
+            Grátis <span>para começar</span>
+          </h3>
           <p className="price-description">
-            Crie sua página e conheça o fluxo completo sem precisar cadastrar um cartão.
+            Crie sua página e conheça o fluxo completo sem precisar cadastrar um
+            cartão.
           </p>
           <Link className="button button-primary button-large" href="/register">
             Criar minha página
@@ -549,7 +659,10 @@ export default function Home() {
         <div className="faq-list">
           {faqs.map((faq, index) => (
             <details key={faq.question} open={index === 0}>
-              <summary>{faq.question}<span aria-hidden="true">+</span></summary>
+              <summary>
+                {faq.question}
+                <span aria-hidden="true">+</span>
+              </summary>
               <p>{faq.answer}</p>
             </details>
           ))}
@@ -565,7 +678,10 @@ export default function Home() {
           <Link className="button button-primary button-large" href="/register">
             Começar grátis
           </Link>
-          <a className="button button-secondary button-large" href="#demonstracao">
+          <a
+            className="button button-secondary button-large"
+            href="#demonstracao"
+          >
             Explorar o editor
           </a>
         </div>

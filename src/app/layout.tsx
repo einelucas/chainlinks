@@ -4,7 +4,7 @@ import "./globals.css";
 import "./landing.css";
 
 export const metadata: Metadata = {
-  title: "LinkPage — Um único link. Totalmente seu.",
+  title: "ChainLinks — Um único link. Totalmente seu.",
   description:
     "Crie uma página de links personalizada em minutos. Escolha cores, fontes e efeitos pelo editor visual, sem precisar programar.",
 };
