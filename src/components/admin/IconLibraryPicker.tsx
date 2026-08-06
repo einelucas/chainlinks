@@ -12,17 +12,24 @@ import {
 type Props = {
   value?: string | null;
   onChange: (dataUrl: string | null) => void;
+  /** Restringe os modos de cor oferecidos (ex.: só preto/branco para ícones monocromáticos). */
+  colorModes?: IconColorMode[];
 };
 
-const COLOR_MODES: { value: IconColorMode; label: string }[] = [
+const ALL_COLOR_MODES: { value: IconColorMode; label: string }[] = [
   { value: "color", label: "Colorido" },
   { value: "black", label: "Preto" },
   { value: "white", label: "Branco" },
 ];
 
-export default function IconLibraryPicker({ value, onChange }: Props) {
+export default function IconLibraryPicker({
+  value,
+  onChange,
+  colorModes = ["color", "black", "white"],
+}: Props) {
+  const availableModes = ALL_COLOR_MODES.filter((m) => colorModes.includes(m.value));
   const [query, setQuery] = useState("");
-  const [mode, setMode] = useState<IconColorMode>("color");
+  const [mode, setMode] = useState<IconColorMode>(colorModes[0] ?? "color");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -45,7 +52,7 @@ export default function IconLibraryPicker({ value, onChange }: Props) {
           onChange={(event) => setQuery(event.target.value)}
         />
         <div className="icon-library-modes">
-          {COLOR_MODES.map((m) => (
+          {availableModes.map((m) => (
             <button
               key={m.value}
               type="button"

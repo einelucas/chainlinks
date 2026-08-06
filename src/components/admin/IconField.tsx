@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { IconColorMode } from "@/lib/icon-library";
 import IconLibraryPicker from "./IconLibraryPicker";
 import ImageUploadField from "./ImageUploadField";
 
@@ -8,9 +9,19 @@ type Props = {
   value?: string | null;
   onChange: (dataUrl: string | null) => void;
   compact?: boolean;
+  colorModes?: IconColorMode[];
+  uploadLabel?: string;
+  uploadHelper?: string;
 };
 
-export default function IconField({ value, onChange, compact }: Props) {
+export default function IconField({
+  value,
+  onChange,
+  compact,
+  colorModes,
+  uploadLabel = "Ícone do link",
+  uploadHelper = "Opcional · PNG, JPG, WEBP ou SVG",
+}: Props) {
   const [mode, setMode] = useState<"library" | "upload">("library");
 
   return (
@@ -33,11 +44,11 @@ export default function IconField({ value, onChange, compact }: Props) {
       </div>
 
       {mode === "library" ? (
-        <IconLibraryPicker value={value} onChange={onChange} />
+        <IconLibraryPicker value={value} onChange={onChange} colorModes={colorModes} />
       ) : (
         <ImageUploadField
-          label="Ícone do link"
-          helper="Opcional · PNG, JPG, WEBP ou SVG"
+          label={uploadLabel}
+          helper={uploadHelper}
           value={value}
           maxSizeMb={1}
           onChange={onChange}

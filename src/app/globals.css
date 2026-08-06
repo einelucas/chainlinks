@@ -773,6 +773,14 @@ button {
   color: var(--admin-muted-2);
 }
 
+.editor-card-hint {
+  margin: 10px 0 0;
+  color: var(--admin-muted-2);
+  font-size: 9px;
+  font-weight: 450;
+  line-height: 1.4;
+}
+
 .editor-error-text {
   color: var(--admin-red);
 }

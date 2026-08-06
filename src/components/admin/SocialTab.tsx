@@ -4,8 +4,11 @@ import { useState } from "react";
 import type { SocialIconData } from "@/lib/types";
 import { SOCIAL_PLATFORMS } from "@/lib/types";
 import { PLATFORM_ICON_MAP } from "@/components/icons";
+import { buildChannelUrl, extractChannelInput } from "@/lib/social-links";
 import { PlusIcon, SocialIcon, TrashIcon } from "./AdminIcons";
-import ImageUploadField from "./ImageUploadField";
+import IconField from "./IconField";
+
+const MONOCHROME_MODES = ["black", "white"] as const;
 
 const PLATFORM_LABELS: Record<string, string> = {
   whatsapp: "WhatsApp",
@@ -20,6 +23,19 @@ const PLATFORM_LABELS: Record<string, string> = {
   custom: "Outro / customizado",
 };
 
+function channelFieldLabel(platform: string): string {
+  if (platform === "whatsapp") return "Número do WhatsApp";
+  if (platform === "phone") return "Número de telefone";
+  if (platform === "email") return "Endereço de email";
+  return "URL do perfil";
+}
+
+function channelPlaceholder(platform: string): string {
+  if (platform === "whatsapp" || platform === "phone") return "11 98765-4321";
+  if (platform === "email") return "seuemail@exemplo.com";
+  return "https://...";
+}
+
 type Props = {
   socials: SocialIconData[];
   onAdd: (platform: string, url: string) => void;
@@ -29,12 +45,12 @@ type Props = {
 
 export default function SocialTab({ socials, onAdd, onUpdate, onDelete }: Props) {
   const [platform, setPlatform] = useState("whatsapp");
-  const [url, setUrl] = useState("");
+  const [input, setInput] = useState("");
 
   function handleAdd() {
-    if (!url.trim()) return;
-    onAdd(platform, url.trim());
-    setUrl("");
+    if (!input.trim()) return;
+    onAdd(platform, buildChannelUrl(platform, input));
+    setInput("");
   }
 
   const sorted = [...socials].sort((a, b) => a.order - b.order);
@@ -45,7 +61,7 @@ export default function SocialTab({ socials, onAdd, onUpdate, onDelete }: Props)
         <div className="editor-card-heading">
           <span className="editor-card-icon"><SocialIcon /></span>
           <div>
-            <h2>Adicionar rede social</h2>
+            <h2>Adicionar canal</h2>
             <p>Escolha o canal e informe o endereço que será aberto.</p>
           </div>
         </div>
@@ -63,28 +79,28 @@ export default function SocialTab({ socials, onAdd, onUpdate, onDelete }: Props)
           </label>
 
           <label className="editor-field">
-            <span>{platform === "email" ? "Endereço de email" : platform === "phone" ? "Número de telefone" : "URL do perfil"}</span>
+            <span>{channelFieldLabel(platform)}</span>
             <input
               type="text"
-              placeholder={
-                platform === "email"
-                  ? "seuemail@exemplo.com"
-                  : platform === "phone"
-                    ? "+55 67 99999-0000"
-                    : "https://..."
-              }
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
+              placeholder={channelPlaceholder(platform)}
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
             />
           </label>
         </div>
+
+        {(platform === "whatsapp" || platform === "phone") && (
+          <p className="editor-card-hint">
+            Só o número com DDD — o código do Brasil (+55) é adicionado automaticamente.
+          </p>
+        )}
 
         <div className="editor-card-actions">
           <button
             type="button"
             onClick={handleAdd}
             className="admin-primary-button"
-            disabled={!url.trim()}
+            disabled={!input.trim()}
           >
             <PlusIcon />
             Adicionar canal
@@ -142,21 +158,25 @@ export default function SocialTab({ socials, onAdd, onUpdate, onDelete }: Props)
 
                   <div className="editor-social-details">
                     <label className="editor-field">
-                      <span>Destino</span>
+                      <span>{channelFieldLabel(social.platform)}</span>
                       <input
                         type="text"
-                        value={social.url}
-                        onChange={(event) => onUpdate(social.id, { url: event.target.value })}
+                        value={extractChannelInput(social.platform, social.url)}
+                        onChange={(event) =>
+                          onUpdate(social.id, {
+                            url: buildChannelUrl(social.platform, event.target.value),
+                          })
+                        }
                       />
                     </label>
 
-                    <ImageUploadField
-                      label="Ícone personalizado"
-                      helper="Opcional · substitui o ícone da rede"
+                    <IconField
                       value={social.icon}
-                      maxSizeMb={2}
                       onChange={(dataUrl) => onUpdate(social.id, { icon: dataUrl })}
                       compact
+                      colorModes={[...MONOCHROME_MODES]}
+                      uploadLabel="Ícone personalizado"
+                      uploadHelper="Opcional · substitui o ícone do canal"
                     />
                   </div>
                 </article>

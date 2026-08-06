@@ -38,10 +38,10 @@ const TABS = [
   },
   {
     id: "social",
-    label: "Redes sociais",
+    label: "Canais",
     eyebrow: "Conteúdo",
-    title: "Redes sociais",
-    description: "Mantenha seus canais e formas de contato sempre acessíveis.",
+    title: "Canais",
+    description: "Links secundários e formas de contato, exibidos abaixo dos links principais.",
     icon: SocialIcon,
   },
   {
@@ -312,7 +312,7 @@ export default function AdminDashboard() {
           : previous
       );
     } catch (error) {
-      console.error("[admin] Erro ao adicionar rede social:", error);
+      console.error("[admin] Erro ao adicionar canal:", error);
       setSaveState("error");
     }
   }
