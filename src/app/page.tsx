@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 
 const editorNav = [
   { icon: "◉", label: "Estilo", active: true },
@@ -316,7 +318,16 @@ function EditorDemo() {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/admin");
+  }
+
   return (
     <main className="site-shell">
       <div className="ambient-grid" aria-hidden="true" />
