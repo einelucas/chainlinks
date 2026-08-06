@@ -25,7 +25,7 @@ import {
   PlusIcon,
   TrashIcon,
 } from "./AdminIcons";
-import ImageUploadField from "./ImageUploadField";
+import IconField from "./IconField";
 
 type Props = {
   links: LinkItemData[];
@@ -106,14 +106,7 @@ export default function LinksTab({
           </label>
         </div>
 
-        <ImageUploadField
-          label="Ícone do link"
-          helper="Opcional · PNG, JPG, WEBP ou SVG"
-          value={newIcon}
-          maxSizeMb={1}
-          onChange={setNewIcon}
-          compact
-        />
+        <IconField value={newIcon} onChange={setNewIcon} compact />
 
         <div className="editor-card-actions">
           <button
@@ -286,11 +279,8 @@ function SortableLinkRow({
             </label>
           </div>
 
-          <ImageUploadField
-            label="Ícone do link"
-            helper="Opcional · substitui o ícone padrão"
+          <IconField
             value={link.icon}
-            maxSizeMb={1}
             onChange={(dataUrl) => onUpdate(link.id, { icon: dataUrl })}
             compact
           />
