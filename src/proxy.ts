@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // sessão em Server Components não são atualizados e a sessão expira mais
 // cedo do que deveria. Não decide autorização de rota — isso continua em
 // src/app/admin/layout.tsx — só mantém a sessão viva.
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
