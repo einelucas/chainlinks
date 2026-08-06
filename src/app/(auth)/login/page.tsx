@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
@@ -34,7 +33,6 @@ function GoogleIcon() {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -69,8 +67,10 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/admin");
-    router.refresh();
+    // Navegação completa (não router.push): garante que o servidor recebe
+    // o cookie de sessão recém-criado já na primeira request pro /admin,
+    // sem depender de cache/timing do client-side router.
+    window.location.href = "/admin";
   }
 
   async function handleGoogleLogin() {

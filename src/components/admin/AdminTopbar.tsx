@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { ExternalIcon, LogoutIcon } from "./AdminIcons";
 import ThemeToggle from "./ThemeToggle";
@@ -17,13 +16,13 @@ export default function AdminTopbar({
   initialTheme: "light" | "dark";
 }) {
   const initial = (userName || username || "C").trim().charAt(0).toUpperCase();
-  const router = useRouter();
 
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+    // Navegação completa: garante que a sessão expirada seja refletida na
+    // primeira request pro /login, sem depender de cache do client-side router.
+    window.location.href = "/login";
   }
 
   return (

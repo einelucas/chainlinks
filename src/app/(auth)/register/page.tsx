@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -41,6 +39,7 @@ export default function RegisterPage() {
         password: form.password,
         options: {
           data: { name: form.name, username: form.username },
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/admin`,
         },
       });
 
@@ -61,8 +60,10 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push("/admin");
-      router.refresh();
+      // Navegação completa (não router.push): garante que o servidor recebe
+      // o cookie de sessão recém-criado já na primeira request pro /admin,
+      // sem depender de cache/timing do client-side router.
+      window.location.href = "/admin";
     } catch {
       setError("Erro de conexão. Tente novamente.");
       setLoading(false);
