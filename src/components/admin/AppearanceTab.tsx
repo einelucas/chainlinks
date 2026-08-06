@@ -8,11 +8,13 @@ import {
   ButtonIcon,
   DeviceIcon,
   SparkleIcon,
+  TemplateIcon,
   TypeIcon,
 } from "./AdminIcons";
 import ColorField from "./ColorField";
 import ImageUploadField from "./ImageUploadField";
 import RangeControl from "./RangeControl";
+import TemplateGallery from "./TemplateGallery";
 
 type Props = {
   bgType: string;
@@ -41,9 +43,10 @@ type Props = {
   onUpdate: (data: Record<string, unknown>) => void;
 };
 
-type AppearanceSection = "background" | "typography" | "buttons" | "effects";
+type AppearanceSection = "templates" | "background" | "typography" | "buttons" | "effects";
 
 const SECTIONS = [
+  { id: "templates", label: "Modelos", icon: TemplateIcon },
   { id: "background", label: "Fundo", icon: BackgroundIcon },
   { id: "typography", label: "Tipografia", icon: TypeIcon },
   { id: "buttons", label: "Botões", icon: ButtonIcon },
@@ -86,7 +89,7 @@ function SectionCard({
 }
 
 export default function AppearanceTab(props: Props) {
-  const [section, setSection] = useState<AppearanceSection>("background");
+  const [section, setSection] = useState<AppearanceSection>("templates");
   const { onUpdate } = props;
   const fontSize = clamp(Number.isFinite(props.fontSize) ? props.fontSize : 16, 12, 24);
   const buttonRadius = clamp(
@@ -116,6 +119,16 @@ export default function AppearanceTab(props: Props) {
       </nav>
 
       <div className="appearance-section" key={section}>
+        {section === "templates" && (
+          <SectionCard
+            icon={<TemplateIcon />}
+            title="Modelos prontos"
+            description="Aplique um visual completo com um clique. Você pode ajustar qualquer detalhe depois."
+          >
+            <TemplateGallery current={props} onApply={onUpdate} />
+          </SectionCard>
+        )}
+
         {section === "background" && (
           <SectionCard
             icon={<BackgroundIcon />}

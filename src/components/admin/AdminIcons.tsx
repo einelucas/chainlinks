@@ -192,6 +192,17 @@ export function SpinnerIcon(props: IconProps) {
   );
 }
 
+export function TemplateIcon(props: IconProps) {
+  return (
+    <svg {...iconProps(props)}>
+      <rect x="3" y="3" width="7.5" height="7.5" rx="1.8" />
+      <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8" />
+      <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8" />
+      <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8" />
+    </svg>
+  );
+}
+
 export function BackgroundIcon(props: IconProps) {
   return (
     <svg {...iconProps(props)}>
